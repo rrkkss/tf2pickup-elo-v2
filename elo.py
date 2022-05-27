@@ -1,8 +1,6 @@
 import exception
 
-def count_elo(playerElo, team, redElo, redScore, bluElo, bluScore):
-    #print(f"cerveni: {red} \n elo cervenych: {redElo} \n skore cervenych {redScore} \n blu: {blu} \n BElo {bluElo}, skore m: {bluScore}")
-    
+def count_elo(playerElo, team, redElo, redScore, bluElo, bluScore):    
     if redScore > bluScore:
         RF = 1
         BF = 0
