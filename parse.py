@@ -72,7 +72,27 @@ def get_data_from_log(j):
     scoreBlu = get_scores_from_data(j, 'Blue')
 
     for i in j['players'].items():
-        id = i[0]
+        playerID = i[0]
+
+        playerInfo = dict(i[1].items())
+        playerClass = playerInfo['class_stats'][0]['type']
+        playerClassTime = playerInfo['class_stats'][0]['total_time']
+        playerTeam = playerInfo['team']
+        playerDAPM = playerInfo['dapm']         # damage per minute
+        playerKPM = 0                           # kills per minute
+        playerKPD = playerInfo['kpd']           # kill per death
+        playerKAPD = playerInfo['kapd']         # kill + assist per death
+        playerDMG = playerInfo['dmg']
+        playerDT = playerInfo['dt']             # damage taken
+        playerDAPD = playerInfo['dapd']         # damage per death
+        playerHR = playerInfo['hr']             # heals recieved
+        playerAirshots = playerInfo['as']
+        playerKills = playerInfo['kills']
+        playerAssists = playerInfo['assists']
+        playerDeaths = playerInfo['deaths']
+        playerHeal = playerInfo['heal']
+        playerUbers = playerInfo['ubers']
+        playerUD = playerInfo['drops']
         
 def get_scores_from_data(j, team):
     for x in j["teams"].items():
