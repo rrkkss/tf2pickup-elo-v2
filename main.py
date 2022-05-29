@@ -2,6 +2,6 @@ import parse
 
 def main():
     parse.get_logs()
-    parse.end()
+    parse.show_result()
 
 main()

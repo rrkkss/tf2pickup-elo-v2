@@ -1,5 +1,5 @@
 class player:
-    def __init__(self, id, nick, elo, gamesCount, wins, loses, redGames, redLoses, redWins, bluGames, bluLoses, bluWins,
+    def __init__(self, id, nick, elo, bonusElo, gamesCount, wins, loses, redGames, redLoses, redWins, bluGames, bluLoses, bluWins,
                 scoutGames, scoutPlayTime, scoutDPM, scoutKPM, scoutKD, scoutKDA, scoutACC, scoutKills, scoutAssists, scoutDeaths,
                 soldierGames, soldierPlayTime, soldierDPM, soldierKPM, soldierKD, soldierKDA, soldierAirshots, soldierKills, soldierAssists, soldierDeaths,
                 demoGames, demoPlayTime, demoDPM, demoKPM, demoKD, demoKDA, demoAirshots, demoKills, demoAssists, demoDeaths,
@@ -7,6 +7,7 @@ class player:
         self.id = id
         self.nick = nick
         self.elo = elo
+        self.bonusElo = bonusElo
         self.gamesCount = gamesCount
         self.wins = wins
         self.loses = loses
@@ -61,4 +62,4 @@ class player:
         self.medicHPM = medicHPM
 
 def createPlayer(id, nick):
-    return player(id, nick, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    return player(id, nick, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
