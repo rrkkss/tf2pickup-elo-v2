@@ -3,6 +3,7 @@ import time
 import player
 import exception
 import elo
+import eloBonus
 
 player_list = []
 
@@ -38,22 +39,24 @@ def get_logs():
                         break
                 log_list.append(n[0])
 
-    parse_logs(log_list, wait)
+    parse_logs(log_list, wait, row)
 
-def parse_logs(log_list, wait):
+def parse_logs(log_list, wait, results):
     count = 0 # for testing purposes
     for i in log_list:
         count += 1
-        if count > 1:
-            break
+        # if count > 3:
+        #     break
         time.sleep(wait)
         url = 'https://logs.tf/json/' + str(i)
-        print('~~~~~~~~~~~~~~~~~~~~~~~')
 
         try:
             j = requests.get(url).json()
             if j['success'] == True:
-                print(f"OK - {url}")
+                print(f"OK - {url} [{count}/{results}]")
+            if is_shit_log(j['teams']):
+                print(f"Shit log detected, skipping")
+                continue
         except Exception as e:
             print(f"FAILED - {url}: {e}; bad response, failed parsing. skipping")
             continue
@@ -81,7 +84,7 @@ def get_data_from_log(j):
         playerClass = playerInfo['class_stats'][0]['type']
         playerClassTime = playerInfo['class_stats'][0]['total_time']
         playerTeam = playerInfo['team']
-        playerDAPM = playerInfo['dapm']         # damage per minute
+        playerDPM = playerInfo['dapm']         # damage per minute
         playerKPD = playerInfo['kpd']           # kill per death
         playerKAPD = playerInfo['kapd']         # kill + assist per death
         playerDMG = playerInfo['dmg']
@@ -95,6 +98,7 @@ def get_data_from_log(j):
         playerHeal = playerInfo['heal']
         playerUbers = playerInfo['ubers']
         playerUD = playerInfo['drops']
+        playerCPC = playerInfo['cpc']
         playerKPM = int(playerKills / (gameLength / 60)) # kills per minute
 
         if playerTeam == 'Red':
@@ -104,21 +108,25 @@ def get_data_from_log(j):
             teamBlu.append(playerID)
             teamBluElo.append(get_player_elo(playerID))
 
-        print(teamRedElo)
-        print(teamBluElo)
-
-        # oddelat set_player_elo ven z for loopu
-        # average tak nikdy nenastane
-        # set_player_elo by mel loopovat po jiz existujich listech hracu
-        # z tech si potom vytahne ID a uz by to melo fakcit
-        set_player_elo(playerID,
-            elo.count_elo(
-                get_player_elo(playerID), playerTeam,
-                get_average_elo(teamRedElo), scoreRed,
-                get_average_elo(teamBluElo), scoreBlu
+        set_player_bonus_elo(
+            playerID,
+            eloBonus.calculate_bonus_elo(
+                playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength
             )
         )
+
+    for i in teamRed:
+        loop_over_team(i, 'Red', teamRedElo, scoreRed, teamBluElo, scoreBlu)
+
+    for i in teamBlu:
+        loop_over_team(i, 'Blu', teamRedElo, scoreRed, teamBluElo, scoreBlu)
         
+def is_shit_log(teams):
+    for i in teams.items():
+        if i[1]['kills'] < 32:
+            return True
+    return False
+
 def get_scores_from_data(j, team):
     for x in j["teams"].items():
         if x[0] == team:
@@ -136,10 +144,33 @@ def get_player_elo(id):
             return i.elo
     return exception.IdNotFoundException
 
+def loop_over_team(id, playerTeam, teamRedElo, scoreRed, teamBluElo, scoreBlu):
+    set_player_elo(id, 
+        elo.count_elo(
+            get_player_elo(id), playerTeam,
+            get_average_elo(teamRedElo), scoreRed,
+            get_average_elo(teamBluElo), scoreBlu
+        )
+    )
+
+def get_player_name(id):
+    for i in player_list:
+        if i.id == id:
+            return i.nick
+
 def set_player_elo(id, elo):
     for i in player_list:
         if i.id == id:
-            i.id = elo
+            try:
+                if i.bonusElo > -40:
+                    i.elo = elo + i.bonusElo
+            except:
+                print(f"elo couldnt be set for '{get_player_name(id)}', probably due to being subbed out")
+
+def set_player_bonus_elo(id, elo):
+    for i in player_list:
+        if i.id == id:
+            i.bonusElo = elo
 
 def get_average_elo(list):
     count = 0
@@ -148,6 +179,8 @@ def get_average_elo(list):
 
     return float(count/len(list))
 
-def end():
+def show_result():
+    print('~~~~~~~~~~~~~~~~~~~~~~~')
+    
     for i in player_list:
-        print(f"{i.id} - {i.nick}, elo: {i.elo}")
+        print(f"{i.nick}, {round(i.elo)}")
