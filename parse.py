@@ -183,4 +183,4 @@ def show_result():
     print('~~~~~~~~~~~~~~~~~~~~~~~')
     
     for i in player_list:
-        print(f"{i.nick}, {round(i.elo)}")
+        print(f"{i.nick} - {round(i.elo)}")
