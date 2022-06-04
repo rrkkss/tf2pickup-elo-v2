@@ -4,8 +4,11 @@ import player
 import exception
 import elo
 import eloBonus
+import predictions
 
 player_list = []
+predictionRight = 0
+predictionFalse = 0
 
 def get_logs():
     title = input("Enter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
@@ -45,7 +48,7 @@ def parse_logs(log_list, wait, results):
     count = 0 # for testing purposes
     for i in log_list:
         count += 1
-        # if count > 3:
+        # if count > 20:
         #     break
         time.sleep(wait)
         url = 'https://logs.tf/json/' + str(i)
@@ -115,6 +118,18 @@ def get_data_from_log(j):
             )
         )
 
+    #print(f"BLU [{scoreBlu}]: {round(get_average_elo(teamBluElo))} ({round(elo.count_win_chance(get_average_elo(teamRedElo), get_average_elo(teamBluElo)), 2)}%), RED [{scoreRed}]: {round(get_average_elo(teamRedElo))} ({round(elo.count_win_chance(get_average_elo(teamBluElo), get_average_elo(teamRedElo)), 2)}%) \n")
+    
+    if (predictions.was_prediction_right(
+            scoreBlu, scoreRed, 
+            elo.count_win_chance(get_average_elo(teamRedElo), get_average_elo(teamBluElo)),
+            elo.count_win_chance(get_average_elo(teamBluElo), get_average_elo(teamRedElo)))):
+        global predictionRight
+        predictionRight += 1
+    else:
+        global predictionFalse
+        predictionFalse += 1
+
     for i in teamRed:
         loop_over_team(i, 'Red', teamRedElo, scoreRed, teamBluElo, scoreBlu)
 
@@ -183,4 +198,6 @@ def show_result():
     print('~~~~~~~~~~~~~~~~~~~~~~~')
     
     for i in player_list:
-        print(f"{i.nick}, {round(i.elo)}")
+        print(f"{i.nick} - {round(i.elo)}")
+    
+    print(f"[{predictionRight}:{predictionFalse}], {(predictionRight/(predictionFalse + predictionRight)) * 100}% correct predictions")
