@@ -13,12 +13,12 @@ predictionFalse = 0
 canAddBonusElo = True
 
 def get_logs():
-    title = input("\nEnter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
+    search = input("\nEnter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
     wait = input("Enter wait time inbetween logs, def 0.4 => ") or 0.4
-    wait = is_valid_number(wait)
+    wait = is_wait_number_valid(wait)
     can_add_bonus_elo(input("Count bonus elo (extra elo points based on kills, deaths etc)? [y / n]; def y => ") or 'y')
 
-    url = 'http://logs.tf/api/v1/log?title=' + title
+    url = 'http://logs.tf/api/v1/log?title=' + search + '&limit=5000'
     print(f"\nparsing from: {url}")
 
     try:
@@ -30,14 +30,14 @@ def get_logs():
     results = list(j.values())[1]
     # row = results[1]
 
-    if title == 'tf2pickup.cz':
+    if search == 'tf2pickup.cz':
         results = results - 24 # comment below, it was 24 of them
 
     if results > 0:
         print(f"Found {results} results\n")
-        parse_logs(create_log_list(j, title), wait, results)
+        parse_logs(create_log_list(j, search), wait, results)
     else:
-        print(f"Found {results} logs, try another search term")
+        print(f"Found {results} results, try another search term")
         get_logs()
 
 def create_log_list(json, title):
@@ -167,7 +167,7 @@ def is_player_added(id):
 def get_player_elo(id):
     for i in playerList:
         if i.id == id:
-            return i.elo
+            return i.eloNew
     return exception.IdNotFoundException
 
 def loop_over_team(id, playerTeam, teamRedElo, scoreRed, teamBluElo, scoreBlu):
@@ -179,7 +179,7 @@ def loop_over_team(id, playerTeam, teamRedElo, scoreRed, teamBluElo, scoreBlu):
         )
     )
 
-def get_player_name(id):
+def get_player_nick(id):
     for i in playerList:
         if i.id == id:
             return i.nick
@@ -189,9 +189,10 @@ def set_player_elo(id, elo):
         if i.id == id:
             try:
                 if i.bonusElo > -40:
-                    i.elo = elo + i.bonusElo
+                    i.eloOld = i.eloNew
+                    i.eloNew = elo + i.bonusElo
             except:
-                print(f"elo couldnt be set for '{get_player_name(id)}', probably due to being subbed out")
+                print(f"elo couldnt be set for '{get_player_nick(id)}', probably due to being subbed out")
 
 def set_player_bonus_elo(id, elo):
     for i in playerList:
@@ -208,10 +209,10 @@ def get_average_elo(list):
 def show_result():
     print('~~~~~~~~~~~~~~~~~~~~~~~')
     
-    playerList.sort(key = operator.attrgetter('elo'), reverse = True)
+    playerList.sort(key = operator.attrgetter('eloNew'), reverse = True)
 
     for i in playerList:
-        print(f"{i.nick} - {round(i.elo)}")
+        print(f"{i.nick} - {round(i.eloNew)}, {round(i.eloNew - i.eloOld)}")
     
     print(f"\n{round((predictionRight/(predictionFalse + predictionRight)) * 100, 3)}% of matches were predicted correctly based on elo")
 
@@ -223,7 +224,7 @@ def can_add_bonus_elo(input):
     else:
         canAddBonusElo = False
 
-def is_valid_number(num):
+def is_wait_number_valid(num):
     isNumberValid = False
 
     while isNumberValid == False:  
