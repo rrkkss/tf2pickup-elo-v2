@@ -5,18 +5,21 @@ import exception
 import elo
 import eloBonus
 import predictions
+import operator
 
-player_list = []
+playerList = []
 predictionRight = 0
 predictionFalse = 0
+canAddBonusElo = True
 
 def get_logs():
-    title = input("Enter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
+    search = input("\nEnter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
     wait = input("Enter wait time inbetween logs, def 0.4 => ") or 0.4
-    wait = float(wait)
+    wait = is_wait_number_valid(wait)
+    can_add_bonus_elo(input("Count bonus elo (extra elo points based on kills, deaths etc)? [y / n]; def y => ") or 'y')
 
-    url = 'http://logs.tf/api/v1/log?title=' + title
-    print(f"parsing from: {url}")
+    url = 'http://logs.tf/api/v1/log?title=' + search + '&limit=5000'
+    print(f"\nparsing from: {url}")
 
     try:
         j = requests.get(url).json()
@@ -24,29 +27,36 @@ def get_logs():
         print(f"{e} \n json couldn't be parsed")
         quit()
 
-    results = list(j.values())
-    row = results[1]
+    results = list(j.values())[1]
+    # row = results[1]
 
-    if title == 'tf2pickup.cz':
-        row = results[1]-24 # comment below, it was 24 of them
-    print(f"{row} results")
+    if search == 'tf2pickup.cz':
+        results = results - 24 # comment below, it was 24 of them
 
-    log_list = []
+    if results > 0:
+        print(f"Found {results} results\n")
+        parse_logs(create_log_list(j, search), wait, results)
+    else:
+        print(f"Found {results} results, try another search term")
+        get_logs()
 
-    for i in j:
+def create_log_list(json, title):
+    logList = []
+
+    for i in json:
         if i == 'logs':
-            for k in j[i]:
+            for k in json[i]:
                 n = list(k.values())
                 if title == 'tf2pickup.cz':
                     if int(n[0]) < 2865412: # first actual czech pug, before that 24 dmixes were under the same title
                         break
-                log_list.append(n[0])
+                logList.append(n[0])
 
-    parse_logs(log_list, wait, row)
+    return logList
 
-def parse_logs(log_list, wait, results):
+def parse_logs(logList, wait, results):
     count = 0 # for testing purposes
-    for i in log_list:
+    for i in logList:
         count += 1
         # if count > 20:
         #     break
@@ -58,10 +68,10 @@ def parse_logs(log_list, wait, results):
             if j['success'] == True:
                 print(f"OK - {url} [{count}/{results}]")
             if is_shit_log(j['teams']):
-                print(f"Shit log detected, skipping")
+                print(f"~~~ Shit log detected, skipping")
                 continue
-        except Exception as e:
-            print(f"FAILED - {url}: {e}; bad response, failed parsing. skipping")
+        except:
+            print(f"FAILED - {url} [{count}/{results}]: nothing to parse, skipping. Wait time probably too SHORT")
             continue
 
         get_data_from_log(j)
@@ -75,7 +85,7 @@ def get_data_from_log(j):
 
     for k, v in nicks:
         if is_player_added(k) == False:
-            player_list.append(player.createPlayer(k, v))
+            playerList.append(player.createPlayer(k, v))
     
     gameLength = int(j['length'])
     scoreRed = get_scores_from_data(j, 'Red')
@@ -111,12 +121,13 @@ def get_data_from_log(j):
             teamBlu.append(playerID)
             teamBluElo.append(get_player_elo(playerID))
 
-        set_player_bonus_elo(
-            playerID,
-            eloBonus.calculate_bonus_elo(
-                playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength
+        if canAddBonusElo:
+            set_player_bonus_elo(
+                playerID,
+                eloBonus.calculate_bonus_elo(
+                    playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength
+                )
             )
-        )
 
     #print(f"BLU [{scoreBlu}]: {round(get_average_elo(teamBluElo))} ({round(elo.count_win_chance(get_average_elo(teamRedElo), get_average_elo(teamBluElo)), 2)}%), RED [{scoreRed}]: {round(get_average_elo(teamRedElo))} ({round(elo.count_win_chance(get_average_elo(teamBluElo), get_average_elo(teamRedElo)), 2)}%) \n")
     
@@ -148,15 +159,15 @@ def get_scores_from_data(j, team):
             return x[1]["score"]
 
 def is_player_added(id):
-    for i in player_list:
+    for i in playerList:
         if i.id == id:
             return True
     return False
 
 def get_player_elo(id):
-    for i in player_list:
+    for i in playerList:
         if i.id == id:
-            return i.elo
+            return i.eloNew
     return exception.IdNotFoundException
 
 def loop_over_team(id, playerTeam, teamRedElo, scoreRed, teamBluElo, scoreBlu):
@@ -168,22 +179,23 @@ def loop_over_team(id, playerTeam, teamRedElo, scoreRed, teamBluElo, scoreBlu):
         )
     )
 
-def get_player_name(id):
-    for i in player_list:
+def get_player_nick(id):
+    for i in playerList:
         if i.id == id:
             return i.nick
 
 def set_player_elo(id, elo):
-    for i in player_list:
+    for i in playerList:
         if i.id == id:
             try:
                 if i.bonusElo > -40:
-                    i.elo = elo + i.bonusElo
+                    i.eloOld = i.eloNew
+                    i.eloNew = elo + i.bonusElo
             except:
-                print(f"elo couldnt be set for '{get_player_name(id)}', probably due to being subbed out")
+                print(f"elo couldnt be set for '{get_player_nick(id)}', probably due to being subbed out")
 
 def set_player_bonus_elo(id, elo):
-    for i in player_list:
+    for i in playerList:
         if i.id == id:
             i.bonusElo = elo
 
@@ -197,7 +209,32 @@ def get_average_elo(list):
 def show_result():
     print('~~~~~~~~~~~~~~~~~~~~~~~')
     
-    for i in player_list:
-        print(f"{i.nick} - {round(i.elo)}")
+    playerList.sort(key = operator.attrgetter('eloNew'), reverse = True)
+
+    for i in playerList:
+        print(f"{i.nick} - {round(i.eloNew)}, {round(i.eloNew - i.eloOld)}")
     
-    print(f"[{predictionRight}:{predictionFalse}], {(predictionRight/(predictionFalse + predictionRight)) * 100}% correct predictions")
+    print(f"\n{round((predictionRight/(predictionFalse + predictionRight)) * 100, 3)}% of matches were predicted correctly based on elo")
+
+def can_add_bonus_elo(input):
+    global canAddBonusElo
+
+    if input == 'y' or input == 'Y':
+        canAddBonusElo = True
+    else:
+        canAddBonusElo = False
+
+def is_wait_number_valid(num):
+    isNumberValid = False
+
+    while isNumberValid == False:  
+        try:
+            num = float(num)
+            if num >= 0:
+                isNumberValid = True
+            else:
+                num = list(num) # definitely ugly design, but it works hey
+        except:
+            num = input(f"Not a valid number, enter a new one => ")
+
+    return num
