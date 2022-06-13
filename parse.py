@@ -28,7 +28,6 @@ def get_logs():
         quit()
 
     results = list(j.values())[1]
-    # row = results[1]
 
     if search == 'tf2pickup.cz':
         results = results - 24 # comment below, it was 24 of them
@@ -56,9 +55,10 @@ def create_log_list(json, title):
 
 def parse_logs(logList, wait, results):
     count = 0 # for testing purposes
-    for i in logList:
+    # for i in logList:
+    for i in reversed(logList):
         count += 1
-        # if count > 20:
+        # if count > 1:
         #     break
         time.sleep(wait)
         url = 'https://logs.tf/json/' + str(i)
