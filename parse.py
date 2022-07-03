@@ -11,12 +11,16 @@ playerList = []
 predictionRight = 0
 predictionFalse = 0
 canAddBonusElo = True
+countEloIndividually = False
+canSkipShitters = True
 
 def get_logs():
     search = input("\nEnter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
     wait = input("Enter wait time inbetween logs, def 0.4 => ") or 0.4
     wait = is_wait_number_valid(wait)
     can_add_bonus_elo(input("Count bonus elo (extra elo points based on kills, deaths etc)? [y / n]; def y => ") or 'y')
+    count_elo_individually(input("Count players' elo individually (player vs team [y]) or not (team vs team [n]); def n => ") or 'n')
+    can_skip_shitters(input("Skip people with less then 5 games in the final log? [y / n]; def y => ") or 'y')
 
     url = 'http://logs.tf/api/v1/log?title=' + search + '&limit=5000'
     print(f"\nparsing from: {url}")
@@ -128,6 +132,8 @@ def get_data_from_log(j):
                     playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength
                 )
             )
+        
+        add_player_stats(playerID)
 
     #print(f"BLU [{scoreBlu}]: {round(get_average_elo(teamBluElo))} ({round(elo.count_win_chance(get_average_elo(teamRedElo), get_average_elo(teamBluElo)), 2)}%), RED [{scoreRed}]: {round(get_average_elo(teamRedElo))} ({round(elo.count_win_chance(get_average_elo(teamBluElo), get_average_elo(teamRedElo)), 2)}%) \n")
     
@@ -171,9 +177,16 @@ def get_player_elo(id):
     return exception.IdNotFoundException
 
 def loop_over_team(id, playerTeam, teamRedElo, scoreRed, teamBluElo, scoreBlu):
-    set_player_elo(id, 
-        elo.count_elo(
-            get_player_elo(id), playerTeam,
+    if countEloIndividually:
+        eloInFocus = get_player_elo(id)
+    elif playerTeam == 'Red':
+        eloInFocus =get_average_elo(teamRedElo)
+    elif playerTeam == 'Blu':
+        eloInFocus =get_average_elo(teamBluElo)
+
+    set_player_elo(
+        id, elo.count_elo(
+            eloInFocus, playerTeam,
             get_average_elo(teamRedElo), scoreRed,
             get_average_elo(teamBluElo), scoreBlu
         )
@@ -206,23 +219,23 @@ def get_average_elo(list):
 
     return float(count/len(list))
 
-def show_result():
-    print('~~~~~~~~~~~~~~~~~~~~~~~')
-    
-    playerList.sort(key = operator.attrgetter('eloNew'), reverse = True)
-
-    for i in playerList:
-        print(f"{i.nick} - {round(i.eloNew)}, {round(i.eloNew - i.eloOld)}")
-    
-    print(f"\n{round((predictionRight/(predictionFalse + predictionRight)) * 100, 3)}% of matches were predicted correctly based on elo")
-
-def can_add_bonus_elo(input):
+def can_add_bonus_elo(input): # def true
     global canAddBonusElo
 
-    if input == 'y' or input == 'Y':
-        canAddBonusElo = True
-    else:
+    if input == 'n' or input == 'n':
         canAddBonusElo = False
+
+def count_elo_individually(input): # def false
+    global countEloIndividually
+
+    if input == 'y' or input == 'Y':
+        countEloIndividually = True
+
+def can_skip_shitters(input): # def true
+    global canSkipShitters
+
+    if input == 'n' or input == 'N':
+        canSkipShitters = False
 
 def is_wait_number_valid(num):
     isNumberValid = False
@@ -238,3 +251,22 @@ def is_wait_number_valid(num):
             num = input(f"Not a valid number, enter a new one => ")
 
     return num
+
+def add_player_stats(id):
+    for i in playerList:
+        if i.id == id:
+            i.gamesCount += 1
+
+def show_result():
+    print('~~~~~~~~~~~~~~~~~~~~~~~')
+    
+    playerList.sort(key = operator.attrgetter('eloNew'), reverse = True)
+
+    for i in playerList:
+        if canSkipShitters:
+            if i.gamesCount <= 5:
+                continue
+
+        print(f"{i.nick} - {round(i.eloNew)}, {round(i.eloNew - i.eloOld)}")
+    
+    print(f"\n{round((predictionRight/(predictionFalse + predictionRight)) * 100, 3)}% of matches were predicted correctly based on elo")
