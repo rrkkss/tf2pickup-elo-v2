@@ -1,10 +1,10 @@
 class player:
     def __init__(
-        self, id, nick, eloNew, eloOld, eloDif, bonusElo, gamesCount, wins, loses, redGames, redLoses, redWins, bluGames, bluLoses, bluWins,
+        self, id, nick, eloNew, eloOld, eloDif, bonusElo, gamesCount, wins, loses, draws, redGames, redLoses, redWins, redDraws, bluGames, bluLoses, bluWins, bluDraws,
         scoutGames, scoutPlayTime, scoutDPM, scoutKPM, scoutKD, scoutKDA, scoutACC, scoutKills, scoutAssists, scoutDeaths,
         soldierGames, soldierPlayTime, soldierDPM, soldierKPM, soldierKD, soldierKDA, soldierAirshots, soldierKills, soldierAssists, soldierDeaths,
         demoGames, demoPlayTime, demoDPM, demoKPM, demoKD, demoKDA, demoAirshots, demoKills, demoAssists, demoDeaths,
-        medicGames, medicPlayTime, medicDPM, medicKPM, medicKD, medicKDA, medicHeals, medicUbers, medicHPM
+        medicGames, medicPlayTime, medicDPM, medicKPM, medicKD, medicKDA, medicHeals, medicUbers, medicHPM, medicKills, medicAssists, medicDeaths
     ):
         self.id = id
         self.nick = nick
@@ -12,15 +12,21 @@ class player:
         self.eloOld = eloOld
         self.eloDif = eloDif
         self.bonusElo = bonusElo
+        
         self.gamesCount = gamesCount
         self.wins = wins
         self.loses = loses
+        self.draws = draws
+        
         self.redGames = redGames
         self.redLoses = redLoses
         self.redWins = redWins
+        self.redDraws = redDraws
+        
         self.bluGames = bluGames
         self.bluLoses = bluLoses
         self.bluWins = bluWins
+        self.bluDraws = bluDraws
         
         self.scoutGames = scoutGames
         self.scoutPlayTime = scoutPlayTime
@@ -64,6 +70,9 @@ class player:
         self.medicHeals = medicHeals
         self.medicUbers = medicUbers
         self.medicHPM = medicHPM
+        self.medicKills = medicKills
+        self.medicAssists = medicAssists
+        self.medicDeaths = medicDeaths
 
 def createPlayer(id, nick):
-    return player(id, nick, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    return player(id, nick, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
