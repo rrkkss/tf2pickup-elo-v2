@@ -58,8 +58,8 @@ def create_log_list(json, title):
     return logList
 
 def parse_logs(logList, wait, results):
-    count = 0 # for testing purposes
-    # for i in logList:
+    count = 0 
+    # for i in logList: # for testing purposes
     for i in reversed(logList):
         count += 1
         # if count > 10:
@@ -267,86 +267,86 @@ def add_player_stats(
         if i.id == id:
             i.gamesCount += 1
 
-        winningTeam = get_winning_team(scoreRed, scoreBlu)
-        if winningTeam != 'draw':
-            if compare_string(winningTeam, playerTeam): #if the player won
-                i.wins += 1
-                if playerTeam == 'blu':
+            winningTeam = get_winning_team(scoreRed, scoreBlu)
+            if winningTeam != 'draw':
+                if compare_string(winningTeam, playerTeam): #if the player won
+                    i.wins += 1
+                    if playerTeam == 'Blue':
+                        i.bluGames += 1
+                        i.bluWins += 1
+                    elif playerTeam == 'Red':
+                        i.redGames += 1
+                        i.redWins += 1
+                else: #if the player lost
+                    i.loses += 1
+                    if playerTeam == 'Blue':
+                        i.bluGames += 1
+                        i.bluLoses += 1
+                    elif playerTeam == 'Red':
+                        i.redGames += 1
+                        i.redLoses += 1
+            else:
+                i.draws += 1
+                if playerTeam == 'Blue':
                     i.bluGames += 1
-                    i.bluWins += 1
-                elif playerTeam == 'red':
+                    i.bluDraws += 1
+                elif playerTeam == 'Red':
                     i.redGames += 1
-                    i.redWins += 1
-            else: #if the player lost
-                i.loses += 1
-                if playerTeam == 'blu':
-                    i.bluGames += 1
-                    i.bluLoses += 1
-                elif playerTeam == 'red':
-                    i.redGames += 1
-                    i.redLoses += 1
-        else:
-            i.draws += 1
-            if playerTeam == 'blu':
-                i.bluGames += 1
-                i.bluDraws += 1
-            elif playerTeam == 'red':
-                i.redGames += 1
-                i.redDraws += 1
+                    i.redDraws += 1
 
-        if playerClass == 'scout':
-            i.scoutGames += 1
-            i.scoutPlayTime += playerClassTime
-            i.scoutDPM += playerDPM
-            i.scoutKPM += playerKPM
-            i.scoutKD += float(playerKPD)
-            i.scoutKDA += float(playerKAPD)
-            i.scoutKills += playerKills
-            i.scoutAssists += playerAssists
-            i.scoutDeaths += playerDeaths
+            if playerClass == 'scout':
+                i.scoutGames += 1
+                i.scoutPlayTime += playerClassTime
+                i.scoutDPM += playerDPM
+                i.scoutKPM += playerKPM
+                i.scoutKD += float(playerKPD)
+                i.scoutKDA += float(playerKAPD)
+                i.scoutKills += playerKills
+                i.scoutAssists += playerAssists
+                i.scoutDeaths += playerDeaths
 
-        elif playerClass == 'soldier':
-            i.soldierGames += 1
-            i.soldierPlayTime += playerClassTime
-            i.soldierDPM += playerDPM
-            i.soldierKPM += playerKPM
-            i.soldierKD += float(playerKPD)
-            i.soldierKDA += float(playerKAPD)
-            i.soldierAirshots += playerAirshots
-            i.soldierKills += playerKills
-            i.soldierAssists += playerAssists
-            i.soldierDeaths += playerDeaths
+            elif playerClass == 'soldier':
+                i.soldierGames += 1
+                i.soldierPlayTime += playerClassTime
+                i.soldierDPM += playerDPM
+                i.soldierKPM += playerKPM
+                i.soldierKD += float(playerKPD)
+                i.soldierKDA += float(playerKAPD)
+                i.soldierAirshots += playerAirshots
+                i.soldierKills += playerKills
+                i.soldierAssists += playerAssists
+                i.soldierDeaths += playerDeaths
 
-        elif playerClass == 'demoman':
-            i.demoGames += 1
-            i.demoPlayTime += playerClassTime
-            i.demoDPM += playerDPM
-            i.demoKPM += playerKPM
-            i.demoKD += float(playerKPD)
-            i.demoKDA += float(playerKAPD)
-            i.demoAirshots += playerAirshots
-            i.demoKills += playerKills
-            i.demoAssists += playerAssists
-            i.demoDeaths += playerDeaths
+            elif playerClass == 'demoman':
+                i.demoGames += 1
+                i.demoPlayTime += playerClassTime
+                i.demoDPM += playerDPM
+                i.demoKPM += playerKPM
+                i.demoKD += float(playerKPD)
+                i.demoKDA += float(playerKAPD)
+                i.demoAirshots += playerAirshots
+                i.demoKills += playerKills
+                i.demoAssists += playerAssists
+                i.demoDeaths += playerDeaths
 
-        elif playerClass == 'medic':
-            i.medicGames += 1
-            i.medicPlayTime += playerClassTime
-            i.medicDPM += playerDPM
-            i.medicKPM += playerKPM
-            i.medicKD += float(playerKPD)
-            i.medicKDA += float(playerKAPD)
-            i.medicHeals += playerHeal
-            i.medicUbers += playerUbers
-            i.medicKills += playerKills
-            i.medicAssists += playerAssists
-            i.medicDeaths += playerDeaths
+            elif playerClass == 'medic':
+                i.medicGames += 1
+                i.medicPlayTime += playerClassTime
+                i.medicDPM += playerDPM
+                i.medicKPM += playerKPM
+                i.medicKD += float(playerKPD)
+                i.medicKDA += float(playerKAPD)
+                i.medicHeals += playerHeal
+                i.medicUbers += playerUbers
+                i.medicKills += playerKills
+                i.medicAssists += playerAssists
+                i.medicDeaths += playerDeaths
 
 def get_winning_team(red, blu):
     if blu > red:
-        return 'blu'
+        return 'Blue'
     elif blu < red:
-        return 'red'
+        return 'Red'
     else:
         return 'draw'
 
@@ -357,6 +357,11 @@ def compare_string(str1, str2):
 
 def calculate_averages():
     for i in playerList:
+        if i.scoutGames == 0: i.scoutGames = 1
+        if i.soldierGames == 0: i.soldierGames = 1
+        if i.demoGames == 0: i.demoGames = 1
+        if i.medicGames == 0: i.medicGames = 1
+
         i.scoutPlayTime = round(i.scoutPlayTime / 3600, 2) #in hours
         i.scoutDPM = round(i.scoutDPM / i.scoutGames, 2)
         i.scoutKPM = round(i.scoutKPM / i.scoutGames, 2)
@@ -409,6 +414,6 @@ def show_result():
             if i.gamesCount <= 5:
                 continue
 
-        print(f"{i.nick} - {round(i.eloNew)}, {round(i.eloNew - i.eloOld)}") # | scout: {i.scoutDPM}, {i.scoutKD} | soldier: {i.soldierDPM}, {i.soldierKD} | demo: {i.demoDPM}, {i.demoKD} | medic: {i.medicHPM}, {i.medicUbers}")
+        print(f"{i.nick} - {round(i.eloNew)}, {round(i.eloNew - i.eloOld)} [{round((i.wins/(i.wins+i.loses)*100),2)}%] | scout: {i.scoutDPM}, {i.scoutKD} [{i.scoutGames}] | soldier: {i.soldierDPM}, {i.soldierKD} [{i.soldierGames}] | demo: {i.demoDPM}, {i.demoKD} [{i.demoGames}] | medic: {i.medicHPM}, {i.medicUbers} [{i.medicGames}]")
     
     print(f"\n{round((predictionRight/(predictionFalse + predictionRight)) * 100, 3)}% of matches were predicted correctly based on elo")
