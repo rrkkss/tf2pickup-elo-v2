@@ -1,11 +1,10 @@
 import requests
 import time
 import player
-import exception
+import exceptions
 import elo
-import eloBonus
 import predictions
-import operator
+import stats
 
 playerList = []
 predictionRight = 0
@@ -21,6 +20,7 @@ def get_logs():
     can_add_bonus_elo(input("Count bonus elo (extra elo points based on kills, deaths etc)? [y / n]; def y => ") or 'y')
     count_elo_individually(input("Count players' elo individually (player vs team [y]) or not (team vs team [n]); def n => ") or 'n')
     can_skip_shitters(input("Skip people with less then 5 games in the final log? [y / n]; def y => ") or 'y')
+    set_elo_factor(input("Set elo factor [number]; def 32 => ") or 32)
 
     url = 'http://logs.tf/api/v1/log?title=' + search + '&limit=5000'
     print(f"\nparsing from: {url}")
@@ -128,7 +128,7 @@ def get_data_from_log(j):
         if canAddBonusElo:
             set_player_bonus_elo(
                 playerID,
-                eloBonus.calculate_bonus_elo(
+                elo.calculate_bonus_elo(
                     playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength
                 )
             )
@@ -179,7 +179,7 @@ def get_player_elo(id):
     for i in playerList:
         if i.id == id:
             return i.eloNew
-    return exception.IdNotFoundException
+    return exceptions.IdNotFoundException
 
 def loop_over_team(id, playerTeam, teamRedElo, scoreRed, teamBluElo, scoreBlu):
     if countEloIndividually:
@@ -242,6 +242,21 @@ def can_skip_shitters(input): # def true
     if input == 'n' or input == 'N':
         canSkipShitters = False
 
+def set_elo_factor(num):
+    isValid = False
+
+    while isValid == False:
+        try:
+            num = int(num)
+            if num > 0:
+                isValid = True
+            else:
+                num = list(num)
+        except:
+            num = input(f"Not a valid number, please enter a new one => ")
+
+    elo.eloFactor = num
+
 def is_wait_number_valid(num):
     isNumberValid = False
 
@@ -265,90 +280,12 @@ def add_player_stats(
 ):
     for i in playerList:
         if i.id == id:
-            i.gamesCount += 1
-
-            winningTeam = get_winning_team(scoreRed, scoreBlu)
-            if winningTeam != 'draw':
-                if compare_string(winningTeam, playerTeam): #if the player won
-                    i.wins += 1
-                    if playerTeam == 'Blue':
-                        i.bluGames += 1
-                        i.bluWins += 1
-                    elif playerTeam == 'Red':
-                        i.redGames += 1
-                        i.redWins += 1
-                else: #if the player lost
-                    i.loses += 1
-                    if playerTeam == 'Blue':
-                        i.bluGames += 1
-                        i.bluLoses += 1
-                    elif playerTeam == 'Red':
-                        i.redGames += 1
-                        i.redLoses += 1
-            else:
-                i.draws += 1
-                if playerTeam == 'Blue':
-                    i.bluGames += 1
-                    i.bluDraws += 1
-                elif playerTeam == 'Red':
-                    i.redGames += 1
-                    i.redDraws += 1
-
-            if playerClass == 'scout':
-                i.scoutGames += 1
-                i.scoutPlayTime += playerClassTime
-                i.scoutDPM += playerDPM
-                i.scoutKPM += playerKPM
-                i.scoutKD += float(playerKPD)
-                i.scoutKDA += float(playerKAPD)
-                i.scoutKills += playerKills
-                i.scoutAssists += playerAssists
-                i.scoutDeaths += playerDeaths
-
-            elif playerClass == 'soldier':
-                i.soldierGames += 1
-                i.soldierPlayTime += playerClassTime
-                i.soldierDPM += playerDPM
-                i.soldierKPM += playerKPM
-                i.soldierKD += float(playerKPD)
-                i.soldierKDA += float(playerKAPD)
-                i.soldierAirshots += playerAirshots
-                i.soldierKills += playerKills
-                i.soldierAssists += playerAssists
-                i.soldierDeaths += playerDeaths
-
-            elif playerClass == 'demoman':
-                i.demoGames += 1
-                i.demoPlayTime += playerClassTime
-                i.demoDPM += playerDPM
-                i.demoKPM += playerKPM
-                i.demoKD += float(playerKPD)
-                i.demoKDA += float(playerKAPD)
-                i.demoAirshots += playerAirshots
-                i.demoKills += playerKills
-                i.demoAssists += playerAssists
-                i.demoDeaths += playerDeaths
-
-            elif playerClass == 'medic':
-                i.medicGames += 1
-                i.medicPlayTime += playerClassTime
-                i.medicDPM += playerDPM
-                i.medicKPM += playerKPM
-                i.medicKD += float(playerKPD)
-                i.medicKDA += float(playerKAPD)
-                i.medicHeals += playerHeal
-                i.medicUbers += playerUbers
-                i.medicKills += playerKills
-                i.medicAssists += playerAssists
-                i.medicDeaths += playerDeaths
-
-def get_winning_team(red, blu):
-    if blu > red:
-        return 'Blue'
-    elif blu < red:
-        return 'Red'
-    else:
-        return 'draw'
+            i = stats.set_stats(
+                i, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
+                playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
+                playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
+                playerHeal, playerUbers, playerUD, playerCPC, playerKPM
+            )
 
 def compare_string(str1, str2):
     if str1 == str2:
@@ -357,63 +294,4 @@ def compare_string(str1, str2):
 
 def calculate_averages():
     for i in playerList:
-        if i.scoutGames == 0: i.scoutGames = 1
-        if i.soldierGames == 0: i.soldierGames = 1
-        if i.demoGames == 0: i.demoGames = 1
-        if i.medicGames == 0: i.medicGames = 1
-
-        i.scoutPlayTime = round(i.scoutPlayTime / 3600, 2) #in hours
-        i.scoutDPM = round(i.scoutDPM / i.scoutGames, 2)
-        i.scoutKPM = round(i.scoutKPM / i.scoutGames, 2)
-        i.scoutKD = round(i.scoutKD / i.scoutGames, 2)
-        i.scoutKDA = round(i.scoutKDA / i.scoutGames, 2)
-        i.scoutKills = round(i.scoutKills / i.scoutGames, 2)
-        i.scoutAssists = round(i.scoutAssists / i.scoutGames, 2)
-        i.scoutDeaths = round(i.scoutDeaths / i.scoutGames, 2)
-
-        i.soldierPlayTime = round(i.soldierPlayTime / 3600, 2)
-        i.soldierDPM = round(i.soldierDPM / i.soldierGames, 2)
-        i.soldierKPM = round(i.soldierKPM / i.soldierGames, 2)
-        i.soldierKD = round(i.soldierKD / i.soldierGames, 2)
-        i.soldierKDA = round(i.soldierKDA / i.soldierGames, 2)
-        i.soldierAirshots = round(i.soldierAirshots / i.soldierGames, 2)
-        i.soldierKills = round(i.soldierKills / i.soldierGames, 2)
-        i.soldierAssists = round(i.soldierAssists / i.soldierGames, 2)
-        i.soldierDeaths = round(i.soldierDeaths / i.soldierGames, 2)
-
-        i.demoPlayTime = round(i.demoPlayTime / 3600, 2)
-        i.demoDPM = round(i.demoDPM / i.demoGames, 2)
-        i.demoKPM = round(i.demoKPM / i.demoGames, 2)
-        i.demoKD = round(i.demoKD / i.demoGames, 2)
-        i.demoKDA = round(i.demoKDA / i.demoGames, 2)
-        i.demoAirshots = round(i.demoAirshots / i.demoGames, 2)
-        i.demoKills = round(i.demoKills / i.demoGames, 2)
-        i.demoAssists = round(i.demoAssists / i.demoGames, 2)
-        i.demoDeaths = round(i.demoDeaths / i.demoGames, 2)
-
-        i.medicPlayTime = round(i.medicPlayTime / 3600, 2)
-        i.medicDPM = round(i.medicDPM / i.medicGames, 2)
-        i.medicKPM = round(i.medicKPM / i.medicGames, 2)
-        i.medicKD = round(i.medicKD / i.medicGames, 2)
-        i.medicKDA = round(i.medicKDA / i.medicGames, 2)
-        i.medicUbers = round(i.medicUbers / i.medicGames, 2)
-        i.medicHPM = round(i.medicHeals / i.medicGames, 2)
-        i.medicKills = round(i.medicKills / i.medicGames, 2)
-        i.medicAssists = round(i.medicAssists / i.medicGames, 2)
-        i.medicDeaths = round(i.medicDeaths / i.medicGames, 2)
-
-def show_result():
-    print('~~~~~~~~~~~~~~~~~~~~~~~')
-    
-    playerList.sort(key = operator.attrgetter('eloNew'), reverse = True)
-
-    calculate_averages()
-
-    for i in playerList:
-        if canSkipShitters:
-            if i.gamesCount <= 5:
-                continue
-
-        print(f"{i.nick} - {round(i.eloNew)}, {round(i.eloNew - i.eloOld)} [{round((i.wins/(i.wins+i.loses)*100),2)}%] | scout: {i.scoutDPM}, {i.scoutKD} [{i.scoutGames}] | soldier: {i.soldierDPM}, {i.soldierKD} [{i.soldierGames}] | demo: {i.demoDPM}, {i.demoKD} [{i.demoGames}] | medic: {i.medicHPM}, {i.medicUbers} [{i.medicGames}]")
-    
-    print(f"\n{round((predictionRight/(predictionFalse + predictionRight)) * 100, 3)}% of matches were predicted correctly based on elo")
+        i = stats.calculate_averages(i)
