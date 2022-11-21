@@ -56,24 +56,19 @@ def create_log_list(json):
     return logList
 
 def parse_logs(logList, wait, results):
-    count = 0 
-    # for i in logList: # for testing purposes
-    for i in reversed(logList):
-        count += 1
-        if count > 100:
-            break
+    for index, i in enumerate(reversed(logList)):
         time.sleep(wait)
         url = 'https://logs.tf/json/' + str(i)
 
         try:
             json = requests.get(url).json()
             if json['success'] == True:
-                print(f"OK - {url} [{count}/{results}]")
+                print(f"OK - {url} [{index+1}/{results}]")
             if is_shit_log(json['teams']):
                 print(f"~~~ Shit log detected, skipping")
                 continue
         except:
-            print(f"FAILED - {url} [{count}/{results}]: nothing to parse, skipping. Wait time probably too SHORT")
+            print(f"FAILED - {url} [{index+1}/{results}]: nothing to parse, skipping. Wait time probably too SHORT")
             continue
 
         get_data_from_log(json)
@@ -198,16 +193,19 @@ def get_player_nick(id):
             return i.nick
 
 def set_player_elo(id, elo):
-    if next((player for player in playerList if player.id == id), None) != None :
-        try:
-            if i.bonusElo > -40:
-                i.eloOld = i.eloNew
-                i.eloNew = elo + i.bonusElo
-        except:
-            print(f"elo couldnt be set for '{get_player_nick(id)}', probably due to being subbed out")
+    for i in playerList:
+        if i.id == id:
+            try:
+                if i.bonusElo > -40:
+                    i.eloOld = i.eloNew
+                    i.eloNew = elo + i.bonusElo
+            except:
+                print(f"elo couldnt be set for '{get_player_nick(id)}', probably due to being subbed out")
 
 def set_player_bonus_elo(id, elo):
-    if next((player for player in playerList if player.id == id), None) != None : player.bonusElo = elo
+     for i in playerList:
+        if i.id == id:
+            i.bonusElo = elo
 
 def get_average_elo(playerList):
     return float(sum(playerList) / len(playerList))
@@ -257,7 +255,11 @@ def is_wait_number_valid(num):
     return float(num)
 
 def is_number_valid(num):
-    return True if num.isdigit() else False
+    try:
+        float(num)
+        return True
+    except:
+        return False
 
 def add_player_stats(
     id, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
@@ -265,13 +267,14 @@ def add_player_stats(
     playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
     playerHeal, playerUbers, playerUD, playerCPC, playerKPM
 ):
-    if next((player for player in playerList if player.id == id), None) != None :
-        player = stats.set_stats(
-            i, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
-            playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
-            playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
-            playerHeal, playerUbers, playerUD, playerCPC, playerKPM
-        )
+    for i in playerList:
+        if i.id == id:
+            i = stats.set_stats(
+                i, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
+                playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
+                playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
+                playerHeal, playerUbers, playerUD, playerCPC, playerKPM
+            )
 
 def compare_string(str1, str2):
     if str1 == str2:
