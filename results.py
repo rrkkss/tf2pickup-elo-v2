@@ -1,7 +1,7 @@
 import stats
 import operator
 
-def show_results(playerList, predictionFalse, predictionRight, canSkipShitters):
+def show_results(playerList: list, predictionFalse: int, predictionRight: int, canSkipShitters: bool):
     print('~~~~~~~~~~~~~~~~~~~~~~~')
     
     playerList.sort(key = operator.attrgetter('eloNew'), reverse = True)

@@ -1,14 +1,19 @@
+import general
+import player
+
 def set_stats(
-    player, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
-    playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
-    playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
-    playerHeal, playerUbers, playerUD, playerCPC, playerKPM
-):
+    player: player.Player, playerClass: str, playerClassTime: int, playerTeam: str, scoreBlu: int, scoreRed: int,
+    playerDPM: int, playerKPD: float, playerKAPD: float, playerDMG: int, playerDT: int, playerDAPD: float,
+    playerHR: int, playerAirshots: int, playerKills: int, playerAssists: int, playerDeaths: int,
+    playerHeal: int, playerUbers: int, playerUD: int, playerCPC: int, playerKPM: int
+) -> player.Player:
+    
     player.gamesCount += 1
 
-    winningTeam = get_winning_team(scoreRed, scoreBlu)
+    winningTeam = general.get_winning_team(scoreRed, scoreBlu)
     if winningTeam != 'draw':
-        if compare_string(winningTeam, playerTeam): #if the player won
+        #if the player won
+        if general.compare_string(winningTeam, playerTeam):
             player.wins += 1
             if playerTeam == 'Blue':
                 player.bluGames += 1
@@ -16,7 +21,9 @@ def set_stats(
             elif playerTeam == 'Red':
                 player.redGames += 1
                 player.redWins += 1
-        else: #if the player lost
+        
+        #if the player lost
+        else:
             player.loses += 1
             if playerTeam == 'Blue':
                 player.bluGames += 1
@@ -24,6 +31,8 @@ def set_stats(
             elif playerTeam == 'Red':
                 player.redGames += 1
                 player.redLoses += 1
+    
+    # if the player drew
     else:
         player.draws += 1
         if playerTeam == 'Blue':
@@ -38,8 +47,8 @@ def set_stats(
         player.scoutPlayTime += playerClassTime
         player.scoutDPM += playerDPM
         player.scoutKPM += playerKPM
-        player.scoutKD += float(playerKPD)
-        player.scoutKDA += float(playerKAPD)
+        player.scoutKD += playerKPD
+        player.scoutKDA += playerKAPD
         player.scoutKills += playerKills
         player.scoutAssists += playerAssists
         player.scoutDeaths += playerDeaths
@@ -49,8 +58,8 @@ def set_stats(
         player.soldierPlayTime += playerClassTime
         player.soldierDPM += playerDPM
         player.soldierKPM += playerKPM
-        player.soldierKD += float(playerKPD)
-        player.soldierKDA += float(playerKAPD)
+        player.soldierKD += playerKPD
+        player.soldierKDA += playerKAPD
         player.soldierAirshots += playerAirshots
         player.soldierKills += playerKills
         player.soldierAssists += playerAssists
@@ -61,8 +70,8 @@ def set_stats(
         player.demoPlayTime += playerClassTime
         player.demoDPM += playerDPM
         player.demoKPM += playerKPM
-        player.demoKD += float(playerKPD)
-        player.demoKDA += float(playerKAPD)
+        player.demoKD += playerKPD
+        player.demoKDA += playerKAPD
         player.demoAirshots += playerAirshots
         player.demoKills += playerKills
         player.demoAssists += playerAssists
@@ -73,8 +82,8 @@ def set_stats(
         player.medicPlayTime += playerClassTime
         player.medicDPM += playerDPM
         player.medicKPM += playerKPM
-        player.medicKD += float(playerKPD)
-        player.medicKDA += float(playerKAPD)
+        player.medicKD += playerKPD
+        player.medicKDA += playerKAPD
         player.medicHeals += playerHeal
         player.medicUbers += playerUbers
         player.medicKills += playerKills
@@ -83,7 +92,7 @@ def set_stats(
 
     return player
 
-def calculate_averages(player):
+def calculate_averages(player: player.Player) -> player.Player:
     if player.scoutGames == 0: player.scoutGames = 1
     if player.soldierGames == 0: player.soldierGames = 1
     if player.demoGames == 0: player.demoGames = 1
@@ -130,16 +139,3 @@ def calculate_averages(player):
     player.medicDeaths = round(player.medicDeaths / player.medicGames, 2)
 
     return player
-
-def get_winning_team(red, blu):
-    if blu > red:
-        return 'Blue'
-    elif blu < red:
-        return 'Red'
-    else:
-        return 'draw'
-
-def compare_string(str1, str2):
-    if str1 == str2:
-        return True
-    return False
