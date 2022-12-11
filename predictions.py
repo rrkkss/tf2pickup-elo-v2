@@ -1,4 +1,4 @@
-def was_prediction_right(blu, red, bluWin, redWin):
+def was_prediction_right(blu: str, red: str, bluWin: float, redWin: float) -> bool:
     if blu > red and bluWin > redWin:
         return True
     elif blu > red and bluWin < redWin:

@@ -2,7 +2,7 @@ import exceptions
 
 eloFactor = 32
 
-def count_elo(playerElo, team, redElo, redScore, bluElo, bluScore):    
+def count_elo(playerElo: float, team: str, redElo: float, redScore: int, bluElo: float, bluScore: int) -> float or Exception:    
     if redScore > bluScore:
         RF = 1
         BF = 0
@@ -23,13 +23,13 @@ def count_elo(playerElo, team, redElo, redScore, bluElo, bluScore):
 
     return exceptions.EloCouldntBeCalculated
 
-def count_new_elo(playerElo, winChance, factor):
+def count_new_elo(playerElo: float, winChance: float, factor: float) -> float:
     return playerElo + eloFactor*(factor - winChance)
 
-def count_win_chance(enemyElo, yourElo):
+def count_win_chance(enemyElo: float, yourElo: float) -> float:
     return (1/(1+10**((enemyElo - yourElo)/400)))
 
-def calculate_bonus_elo(playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength):
+def calculate_bonus_elo(playerClass: str, playerKPD: float, playerKAPD: float, playerDPM: int, playerDMG: int, playerDT: int, playerHeal: int, playerCPC: int, gameLength: int) -> float or Exception:
     if playerClass == 'scout':
         return (float(playerKAPD) - 2)*2 + (float(playerDPM) - 250)/20 + float(playerCPC)/5
             

@@ -1,10 +1,13 @@
-class player:
+class Player:
     def __init__(
-        self, id, nick, eloNew, eloOld, eloDif, bonusElo, gamesCount, wins, loses, draws, redGames, redLoses, redWins, redDraws, bluGames, bluLoses, bluWins, bluDraws,
-        scoutGames, scoutPlayTime, scoutDPM, scoutKPM, scoutKD, scoutKDA, scoutACC, scoutKills, scoutAssists, scoutDeaths,
-        soldierGames, soldierPlayTime, soldierDPM, soldierKPM, soldierKD, soldierKDA, soldierAirshots, soldierKills, soldierAssists, soldierDeaths,
-        demoGames, demoPlayTime, demoDPM, demoKPM, demoKD, demoKDA, demoAirshots, demoKills, demoAssists, demoDeaths,
-        medicGames, medicPlayTime, medicDPM, medicKPM, medicKD, medicKDA, medicHeals, medicUbers, medicHPM, medicKills, medicAssists, medicDeaths
+        self, id: str, nick: str, eloNew: float, eloOld: float, eloDif: float, bonusElo: float, 
+        gamesCount: int, wins: int, loses: int, draws: int, 
+        redGames: int, redLoses: int, redWins: int, redDraws: int, 
+        bluGames: int, bluLoses: int, bluWins: int, bluDraws: int,
+        scoutGames: int,    scoutPlayTime: float,   scoutDPM: int,      scoutKPM: float,    scoutKD: float,     scoutKDA: float,    scoutACC: float,        scoutKills: int,    scoutAssists: int,      scoutDeaths: int,
+        soldierGames: int,  soldierPlayTime: float, soldierDPM: int,    soldierKPM: float,  soldierKD: float,   soldierKDA: float,  soldierAirshots: int,   soldierKills: int,  soldierAssists: int,    soldierDeaths: int,
+        demoGames: int,     demoPlayTime: float,    demoDPM: int,       demoKPM: float,     demoKD: float,      demoKDA: float,     demoAirshots: int,      demoKills: int,     demoAssists: int,       demoDeaths: int,
+        medicGames: int,    medicPlayTime: float,   medicDPM: int,      medicKPM: float,    medicKD: float,     medicKDA: float,    medicHeals: int,        medicUbers: int,    medicHPM: float,        medicKills: int, medicAssists: int, medicDeaths: int
     ):
         self.id = id
         self.nick = nick
@@ -74,5 +77,5 @@ class player:
         self.medicAssists = medicAssists
         self.medicDeaths = medicDeaths
 
-def createPlayer(id, nick):
-    return player(id, nick, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+def createPlayer(id: str, nick: str) -> Player:
+    return Player(id, nick, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
