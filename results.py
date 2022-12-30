@@ -7,9 +7,8 @@ def show_results(playerList: list, predictionFalse: int, predictionRight: int, c
     playerList.sort(key = operator.attrgetter('eloNew'), reverse = True)
 
     for i in playerList:
-        if canSkipShitters:
-            if i.gamesCount <= 5:
-                continue
+        if canSkipShitters and i.gamesCount <= 5:
+            continue
 
         i = stats.calculate_averages(i)
 
