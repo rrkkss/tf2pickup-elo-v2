@@ -93,11 +93,6 @@ def set_stats(
     return player
 
 def calculate_averages(player: player.Player) -> player.Player:
-    if player.scoutGames == 0: player.scoutGames = 1
-    if player.soldierGames == 0: player.soldierGames = 1
-    if player.demoGames == 0: player.demoGames = 1
-    if player.medicGames == 0: player.medicGames = 1
-
     player.scoutPlayTime = round(player.scoutPlayTime / 3600, 2) #in hours
     player.scoutDPM = round(player.scoutDPM / player.scoutGames, 2)
     player.scoutKPM = round(player.scoutKPM / player.scoutGames, 2)
