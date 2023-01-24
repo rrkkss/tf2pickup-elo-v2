@@ -4,16 +4,13 @@ eloFactor = 32
 
 def count_elo(playerElo: float, team: str, redElo: float, redScore: int, bluElo: float, bluScore: int) -> float or Exception:    
     if redScore > bluScore:
-        RF = 1
-        BF = 0
+        RF = 1; BF = 0
 
     elif redScore == bluScore:
-        RF = 0.5
-        BF = 0.5
+        RF = 0.5; BF = 0.5
 
     elif redScore < bluScore:
-        RF = 0
-        BF = 1
+        RF = 0; BF = 1
 
     if team == 'Red':
         return count_new_elo(playerElo, count_win_chance(bluElo, playerElo), RF)
