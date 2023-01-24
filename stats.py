@@ -1,5 +1,6 @@
-import general
-import player
+import general; import player; import exceptions
+
+playerList = []
 
 def set_stats(
     player: player.Player, playerClass: str, playerClassTime: int, playerTeam: str, scoreBlu: int, scoreRed: int,
@@ -134,3 +135,56 @@ def calculate_averages(player: player.Player) -> player.Player:
     player.medicDeaths = round(player.medicDeaths / player.medicGames, 2)
 
     return player
+
+def add_player_stats(
+    id: str, playerClass: str, playerClassTime: int, playerTeam: str, scoreBlu: int, scoreRed: int,
+    playerDPM: int, playerKPD: float, playerKAPD: float, playerDMG: int, playerDT: int, playerDAPD: float,
+    playerHR: int, playerAirshots: int, playerKills: int, playerAssists: int, playerDeaths: int,
+    playerHeal: int, playerUbers: int, playerUD: int, playerCPC: int, playerKPM: int
+):
+    for i in playerList:
+        if i.id == id:
+            i = set_stats(
+                i, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
+                playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
+                playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
+                playerHeal, playerUbers, playerUD, playerCPC, playerKPM
+            )
+
+def get_player_nick(id: str) -> str:
+    for i in playerList:
+        if i.id == id:
+            return i.nick
+
+def set_player_elo(id: str, elo: float):
+    for i in playerList:
+        if i.id == id:
+            try:
+                if i.bonusElo > -40:
+                    i.eloOld = i.eloNew
+                    i.eloNew = elo + i.bonusElo
+            except:
+                print(f"elo couldnt be set for '{get_player_nick(id)}', probably due to being subbed out")
+
+def set_player_bonus_elo(id: str, elo: int):
+     for i in playerList:
+        if i.id == id:
+            i.bonusElo = elo
+
+def get_average_elo(playerListInAGame: list) -> float:
+    return float(sum(playerListInAGame) / len(playerListInAGame))
+
+def is_shit_log(teams):
+    for team in teams.values():
+        if team['kills'] < 32:
+            return True
+    return False
+
+def is_player_added(id):
+    return False if next((player for player in playerList if player.id == id), None) == None else True
+
+def get_player_elo(id: str) -> int or Exception:
+    for i in playerList:
+        if i.id == id:
+            return i.eloNew
+    return exceptions.IdNotFoundException

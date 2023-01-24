@@ -1,18 +1,7 @@
-import requests
-import time
-import player
-import exceptions
-import elo
-import predictions
-import stats
-import general
+import requests; import time; import player; import elo; import predictions; import stats; import general
 
-playerList = []
-predictionRight = 0
-predictionFalse = 0
-canAddBonusElo = True
-countEloIndividually = False
-canSkipShitters = True
+predictionRight = 0; predictionFalse = 0
+canAddBonusElo = True; countEloIndividually = False; canSkipShitters = True
 
 def init_parse():
     search = input("\nEnter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
@@ -65,7 +54,7 @@ def parse_logs(logList: list, wait: float, results: int):
             json = requests.get(url).json()
             if json['success'] == True:
                 print(f"OK - {url} [{index+1}/{results}]")
-            if is_shit_log(json['teams']):
+            if stats.is_shit_log(json['teams']):
                 print(f"~~~ Shit log detected, skipping")
                 continue
         except:
@@ -76,14 +65,11 @@ def parse_logs(logList: list, wait: float, results: int):
 
 def get_data_from_log(json):
     nicks = json['names']
-    teamRed = []
-    teamRedElo = []
-    teamBlu = []
-    teamBluElo = []
+    teamRed = []; teamRedElo = []; teamBlu = []; teamBluElo = []
 
     for k, v in nicks.items():
-        if is_player_added(k) == False:
-            playerList.append(player.createPlayer(k, v))
+        if stats.is_player_added(k) == False:
+            stats.playerList.append(player.createPlayer(k, v))
     
     gameLength = int(json['length']) # in seconds
     scoreRed = get_scores_from_json(json, 'Red')
@@ -93,7 +79,7 @@ def get_data_from_log(json):
         playerID = p[0]
         playerInfo = dict(p[1].items())
         playerClass = playerInfo['class_stats'][0]['type']
-        playerClassTime = int(playerInfo['class_stats'][0]['total_time'])
+        playerClassTime = int(playerInfo['class_stats'][0]['total_time']) #cba honestly
         playerTeam = playerInfo['team']
         playerDPM = int(playerInfo['dapm'])             # damage per minute
         playerKPD = float(playerInfo['kpd'])            # kill per death
@@ -114,32 +100,30 @@ def get_data_from_log(json):
 
         if playerTeam == 'Red':
             teamRed.append(playerID)
-            teamRedElo.append(get_player_elo(playerID))
+            teamRedElo.append(stats.get_player_elo(playerID))
         elif playerTeam == 'Blue':
             teamBlu.append(playerID)
-            teamBluElo.append(get_player_elo(playerID))
+            teamBluElo.append(stats.get_player_elo(playerID))
 
         if canAddBonusElo:
-            set_player_bonus_elo(
-                playerID,
-                elo.calculate_bonus_elo(
+            stats.set_player_bonus_elo(
+                playerID, elo.calculate_bonus_elo(
                     playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength
                 )
             )
         
-        add_player_stats(
+        stats.add_player_stats(
             playerID, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
             playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
             playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
             playerHeal, playerUbers, playerUD, playerCPC, playerKPM
         )
 
-    #print(f"BLU [{scoreBlu}]: {round(get_average_elo(teamBluElo))} ({round(elo.count_win_chance(get_average_elo(teamRedElo), get_average_elo(teamBluElo)), 2)}%), RED [{scoreRed}]: {round(get_average_elo(teamRedElo))} ({round(elo.count_win_chance(get_average_elo(teamBluElo), get_average_elo(teamRedElo)), 2)}%) \n")
-    
     if (predictions.was_prediction_right(
             scoreBlu, scoreRed, 
-            elo.count_win_chance(get_average_elo(teamRedElo), get_average_elo(teamBluElo)),
-            elo.count_win_chance(get_average_elo(teamBluElo), get_average_elo(teamRedElo)))):
+            elo.count_win_chance(stats.get_average_elo(teamRedElo), stats.get_average_elo(teamBluElo)),
+            elo.count_win_chance(stats.get_average_elo(teamBluElo), stats.get_average_elo(teamRedElo))
+    )):
         global predictionRight
         predictionRight += 1
     else:
@@ -151,65 +135,27 @@ def get_data_from_log(json):
 
     for i in teamBlu:
         loop_over_team(i, 'Blu', teamRedElo, scoreRed, teamBluElo, scoreBlu)
-        
-def is_shit_log(teams):
-    for team in teams.values():
-        if team['kills'] < 32:
-            return True
-    return False
 
 def get_scores_from_json(json, team: str) -> int:
     for x in json['teams'].items():
         if x[0] == team:
             return int(x[1]['score'])
 
-def is_player_added(id):
-    return False if next((player for player in playerList if player.id == id), None) == None else True
-
-def get_player_elo(id: str) -> int or Exception:
-    for i in playerList:
-        if i.id == id:
-            return i.eloNew
-    return exceptions.IdNotFoundException
-
 def loop_over_team(id: str, playerTeam: str, teamRedElo: float, scoreRed: int, teamBluElo: float, scoreBlu: int):
     if countEloIndividually:
-        eloInFocus = get_player_elo(id)
+        eloInFocus = stats.get_player_elo(id)
     elif playerTeam == 'Red':
-        eloInFocus = get_average_elo(teamRedElo)
+        eloInFocus = stats.get_average_elo(teamRedElo)
     elif playerTeam == 'Blu':
-        eloInFocus = get_average_elo(teamBluElo)
+        eloInFocus = stats.get_average_elo(teamBluElo)
 
-    set_player_elo(
+    stats.set_player_elo(
         id, elo.count_elo(
             eloInFocus, playerTeam,
-            get_average_elo(teamRedElo), scoreRed,
-            get_average_elo(teamBluElo), scoreBlu
+            stats.get_average_elo(teamRedElo), scoreRed,
+            stats.get_average_elo(teamBluElo), scoreBlu
         )
     )
-
-def get_player_nick(id: str) -> str:
-    for i in playerList:
-        if i.id == id:
-            return i.nick
-
-def set_player_elo(id: str, elo: float):
-    for i in playerList:
-        if i.id == id:
-            try:
-                if i.bonusElo > -40:
-                    i.eloOld = i.eloNew
-                    i.eloNew = elo + i.bonusElo
-            except:
-                print(f"elo couldnt be set for '{get_player_nick(id)}', probably due to being subbed out")
-
-def set_player_bonus_elo(id: str, elo: int):
-     for i in playerList:
-        if i.id == id:
-            i.bonusElo = elo
-
-def get_average_elo(playerList: list) -> float:
-    return float(sum(playerList) / len(playerList))
 
 def can_add_bonus_elo(input: str): # def true
     global canAddBonusElo
@@ -228,18 +174,3 @@ def can_skip_shitters(input: str): # def true
 
     if input == 'n' or input == 'N':
         canSkipShitters = False
-
-def add_player_stats(
-    id: str, playerClass: str, playerClassTime: int, playerTeam: str, scoreBlu: int, scoreRed: int,
-    playerDPM: int, playerKPD: float, playerKAPD: float, playerDMG: int, playerDT: int, playerDAPD: float,
-    playerHR: int, playerAirshots: int, playerKills: int, playerAssists: int, playerDeaths: int,
-    playerHeal: int, playerUbers: int, playerUD: int, playerCPC: int, playerKPM: int
-):
-    for i in playerList:
-        if i.id == id:
-            i = stats.set_stats(
-                i, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
-                playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
-                playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
-                playerHeal, playerUbers, playerUD, playerCPC, playerKPM
-            )
