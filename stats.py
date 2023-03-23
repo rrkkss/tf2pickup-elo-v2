@@ -1,5 +1,6 @@
 import general; import player; import exceptions
 
+predictionRight = 0; predictionFalse = 0
 playerList = []
 
 def set_stats(
@@ -150,6 +151,8 @@ def add_player_stats(
                 playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
                 playerHeal, playerUbers, playerUD, playerCPC, playerKPM
             )
+            
+            return
 
 def get_player_nick(id: str) -> str:
     for i in playerList:
@@ -163,13 +166,16 @@ def set_player_elo(id: str, elo: float):
                 if i.bonusElo > -40:
                     i.eloOld = i.eloNew
                     i.eloNew = elo + i.bonusElo
+                    return
             except:
                 print(f"elo couldnt be set for '{get_player_nick(id)}', probably due to being subbed out")
+                return
 
 def set_player_bonus_elo(id: str, elo: int):
      for i in playerList:
         if i.id == id:
             i.bonusElo = elo
+            return
 
 def get_average_elo(playerListInAGame: list) -> float:
     return float(sum(playerListInAGame) / len(playerListInAGame))

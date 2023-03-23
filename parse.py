@@ -1,15 +1,12 @@
-import requests; import time; import player; import elo; import predictions; import stats; import general
-
-predictionRight = 0; predictionFalse = 0
-canAddBonusElo = True; countEloIndividually = False; canSkipShitters = True
+import requests, time, player, elo, predictions, stats, general, setup
 
 def init_parse():
     search = input("\nEnter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
     wait = input("Enter wait time inbetween logs, def 0.4 => ") or 0.4
     wait = general.is_wait_number_valid(wait)
-    can_add_bonus_elo(input("Count bonus elo (extra elo points based on kills, deaths etc)? [y / n]; def y => ") or 'y')
-    count_elo_individually(input("Count players' elo individually (player vs team [y]) or not (team vs team [n]); def n => ") or 'n')
-    can_skip_shitters(input("Skip people with less then 5 games in the final log? [y / n]; def y => ") or 'y')
+    setup.can_add_bonus_elo(input("Count bonus elo (extra elo points based on kills, deaths etc)? [y / n]; def y => ") or 'y')
+    setup.count_elo_individually(input("Count players' elo individually (player vs team [y]) or not (team vs team [n]); def n => ") or 'n')
+    setup.can_skip_shitters(input("Skip people with less then 5 games in the final log? [y / n]; def y => ") or 'y')
     elo.eloFactor = general.set_elo_factor(input("Set elo factor [number]; def 32 => ") or 32)
 
     get_logs(search, wait)
@@ -34,7 +31,7 @@ def get_logs(search: str, wait: float):
         print(f"Found {logList.__len__()} results\n")
         parse_logs(logList, wait, len(logList))
     else:
-        print(f"Found {results} results, try another search term")
+        print(f"Found {logList.__len__()} results, try another search term")
         change_search_term(wait)
 
 def create_log_list(json) -> list:
@@ -78,8 +75,9 @@ def get_data_from_log(json):
     for p in json['players'].items():
         playerID = p[0]
         playerInfo = dict(p[1].items())
-        playerClass = playerInfo['class_stats'][0]['type']
-        playerClassTime = int(playerInfo['class_stats'][0]['total_time']) #cba honestly
+        playerClassStats = playerInfo['class_stats'][0]
+        playerClass = playerClassStats['type']
+        playerClassTime = int(playerClassStats['total_time']) #cba honestly
         playerTeam = playerInfo['team']
         playerDPM = int(playerInfo['dapm'])             # damage per minute
         playerKPD = float(playerInfo['kpd'])            # kill per death
@@ -105,7 +103,7 @@ def get_data_from_log(json):
             teamBlu.append(playerID)
             teamBluElo.append(stats.get_player_elo(playerID))
 
-        if canAddBonusElo:
+        if setup.canAddBonusElo:
             stats.set_player_bonus_elo(
                 playerID, elo.calculate_bonus_elo(
                     playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength
@@ -124,11 +122,9 @@ def get_data_from_log(json):
             elo.count_win_chance(stats.get_average_elo(teamRedElo), stats.get_average_elo(teamBluElo)),
             elo.count_win_chance(stats.get_average_elo(teamBluElo), stats.get_average_elo(teamRedElo))
     )):
-        global predictionRight
-        predictionRight += 1
+        stats.predictionRight += 1
     else:
-        global predictionFalse
-        predictionFalse += 1
+        stats.predictionFalse += 1
 
     for i in teamRed:
         loop_over_team(i, 'Red', teamRedElo, scoreRed, teamBluElo, scoreBlu)
@@ -142,7 +138,7 @@ def get_scores_from_json(json, team: str) -> int:
             return int(x[1]['score'])
 
 def loop_over_team(id: str, playerTeam: str, teamRedElo: float, scoreRed: int, teamBluElo: float, scoreBlu: int):
-    if countEloIndividually:
+    if setup.countEloIndividually:
         eloInFocus = stats.get_player_elo(id)
     elif playerTeam == 'Red':
         eloInFocus = stats.get_average_elo(teamRedElo)
@@ -156,21 +152,3 @@ def loop_over_team(id: str, playerTeam: str, teamRedElo: float, scoreRed: int, t
             stats.get_average_elo(teamBluElo), scoreBlu
         )
     )
-
-def can_add_bonus_elo(input: str): # def true
-    global canAddBonusElo
-
-    if input == 'n' or input == 'n':
-        canAddBonusElo = False
-
-def count_elo_individually(input: str): # def false
-    global countEloIndividually
-
-    if input == 'y' or input == 'Y':
-        countEloIndividually = True
-
-def can_skip_shitters(input: str): # def true
-    global canSkipShitters
-
-    if input == 'n' or input == 'N':
-        canSkipShitters = False
