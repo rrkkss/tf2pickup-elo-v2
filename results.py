@@ -1,14 +1,11 @@
 import stats
 import operator
-
-def can_skip_shitters(input: str):
-    if input == 'y' or input == 'Y':
-        return True
-    else:
-        return False
+import config
 
 def show_results(playerList: list, predictionFalse: int, predictionRight: int):
-    canSkipShitters: bool = can_skip_shitters(input("\nSkip people with less then or equal to 5 games in the final log? [y / n]; def y => ") or 'y')
+    canSkipShitters: bool = config.can_skip_shitters(input("\nSkip people with less then or equal to 5 games in the final log? [y / n]; def y => ") or 'y')
+    printMethod: str = config.check_export_method(input('Choose export method [print / xlsx] def print => ') or 'print')
+    config.etf2lNick = config.set_etf2l_nicks(input('Change nicks to ETF2L ones? [y / n] def y => ') or 'y')
     prediction: float = round((predictionRight/(predictionFalse + predictionRight)) * 100, 3)
     print('~~~~~~~~~~~~~~~~~~~~~~~')
 
@@ -18,6 +15,7 @@ def show_results(playerList: list, predictionFalse: int, predictionRight: int):
         if canSkipShitters and player.gamesCount <= 5:
             continue
 
+        # etf2lNicks are then used in this method
         player = stats.calculate_averages(player)
 
         print(f"{player.nick} - {round(player.eloNew)}, {round(player.eloNew - player.eloOld)}, WR - [{round((player.wins / (player.wins + player.loses) * 100), 2)}%]") 

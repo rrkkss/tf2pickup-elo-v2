@@ -1,4 +1,4 @@
-import time, player, elo, predictions, stats, general, setup
+import time, player, elo, predictions, stats, general, config
 try:
     import requests, xlsxwriter
 except Exception as e:
@@ -7,8 +7,8 @@ except Exception as e:
     quit()
 
 def init_parse():
-    setup.init_setup(elo) # dependency injection
-    get_logs(setup.search, setup.wait)
+    config.init_setup(elo) # dependency injection
+    get_logs(config.search, config.wait)
 
 def change_search_term(wait: float):
     search = input("\nEnter different keyword' => ")
@@ -106,7 +106,7 @@ def get_data_from_log(json):
             teamBlu.append(playerID)
             teamBluElo.append(stats.get_player_elo(playerID))
 
-        if setup.canAddBonusElo:
+        if config.canAddBonusElo:
             stats.set_player_bonus_elo(
                 playerID, elo.calculate_bonus_elo(
                     playerClass, playerKPD, playerKAPD, playerDPM, playerDMG, playerDT, playerHeal, playerCPC, gameLength
@@ -145,7 +145,7 @@ def loop_over_team(id: str, playerTeam: str, teamRedElo: list[float], scoreRed: 
     avgBluElo = stats.get_average_elo(teamRedElo)
     avgRedElo = stats.get_average_elo(teamBluElo)
     
-    if setup.countEloIndividually:
+    if config.countEloIndividually:
         eloInFocus = stats.get_player_elo(id)
     elif playerTeam == 'Red':
         eloInFocus = avgRedElo

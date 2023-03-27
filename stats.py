@@ -1,4 +1,4 @@
-import general; import player; import exceptions
+import general, player, exceptions, etf2l, config
 
 predictionRight = 0; predictionFalse = 0
 playerList = []
@@ -139,6 +139,9 @@ def calculate_averages(player: player.Player) -> player.Player:
     player.medicKills = round(player.medicKills / player.medicGames, 2)
     player.medicAssists = round(player.medicAssists / player.medicGames, 2)
     player.medicDeaths = round(player.medicDeaths / player.medicGames, 2)
+
+    if config.etf2lNicks:
+        player.nick = etf2l.get_etf2l_nick(player.id) or player.nick
 
     return player
 
