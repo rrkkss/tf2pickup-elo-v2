@@ -1,5 +1,6 @@
 import time, player, elo, predictions, stats, general, config
 try:
+    # I'm importing them here as to prevent some unwanted behaviour way later
     import requests, xlsxwriter
 except Exception as e:
     print(f"Couldn't import module(s): {e}")
@@ -47,9 +48,6 @@ def parse_logs(logList: list, wait: float, results: int):
         time.sleep(wait)
         url = 'https://logs.tf/json/' + str(log)
 
-        if index == 10:
-            break
-
         try:
             json = requests.get(url).json()
             if json['success'] == True:
@@ -80,13 +78,14 @@ def get_data_from_log(json):
         playerInfo = dict(p[1].items())
         playerClassStats = playerInfo['class_stats'][0]
         playerClass = playerClassStats['type']
-        playerClassTime = int(playerClassStats['total_time']) #cba honestly
+        playerClassTime = int(playerClassStats['total_time'])
         playerTeam = playerInfo['team']
         playerDPM = int(playerInfo['dapm'])             # damage per minute
         playerKPD = float(playerInfo['kpd'])            # kill per death
         playerKAPD = float(playerInfo['kapd'])          # kill + assist per death
         playerDMG = int(playerInfo['dmg'])
         playerDT = int(playerInfo['dt'])                # damage taken
+        playerDTM = float(playerInfo['dt']) / (gameLength / 60) # damage taken per minute
         playerDAPD = float(playerInfo['dapd'])          # damage per death
         playerHR = int(playerInfo['hr'])                # heals recieved
         playerAirshots = int(playerInfo['as'])
@@ -115,7 +114,7 @@ def get_data_from_log(json):
         
         stats.add_player_stats(
             playerID, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
-            playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
+            playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDTM, playerDAPD,
             playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
             playerHeal, playerUbers, playerUD, playerCPC, playerKPM
         )

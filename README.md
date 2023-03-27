@@ -3,7 +3,8 @@ because v1 straight up sucks
 
 ### dependencies
 - python >= 3.0 version
-- requests module from pip
+- requests and xlsxwriter, both specified in .txt
+- ``` pip install -r requirements.txt ```
 
 ### usage (config)
 default value means that you can just press enter and get to the next one.
@@ -25,8 +26,10 @@ default value means that you can just press enter and get to the next one.
   - these people are still used in calculations but are skipped in the final print out, as their elo won't be much different from 1600. plus it's usually people from other countries who have played 1 - 2 games max.
 * Set elo factor [number]; def 32
   - this is pretty much the maximum elo one can gain or lose. use 16 if you want the mge style elo.
+* Export as a print into console or create an xlsx file with each player on a seperate sheet.
 
 ### problems / issues
 - it is quite slow when working with large data sets.
 - bonus elo was tailored to czech players, so it scales very poorly to larger groups (such as Poland or France). it needs to be reworked in that sense, but it is not such a big issue.
 - currently it prints out (the result) as a list with objects, having multiple output types would be handy.
+- etf2l api is cloudflared, so if you're one of those privacy aware peeps, you may not want to run the name conversion

@@ -1,6 +1,4 @@
-import stats
-import operator
-import config
+import stats, operator, config, xlsx, player
 
 def show_results(playerList: list, predictionFalse: int, predictionRight: int):
     canSkipShitters: bool = config.can_skip_shitters(input("\nSkip people with less then or equal to 5 games in the final log? [y / n]; def y => ") or 'y')
@@ -11,14 +9,18 @@ def show_results(playerList: list, predictionFalse: int, predictionRight: int):
 
     playerList.sort(key = operator.attrgetter('eloNew'), reverse = True)
 
-    for player in playerList:
-        if canSkipShitters and player.gamesCount <= 5:
-            continue
+    if printMethod == 'print':
+        for player in playerList:
+            if canSkipShitters and player.gamesCount <= 5:
+                continue
 
-        # etf2lNicks are then used in this method
-        player = stats.calculate_averages(player)
+            # etf2lNicks are then used in this method
+            player = stats.calculate_averages(player)
 
-        print(f"{player.nick} - {round(player.eloNew)}, {round(player.eloNew - player.eloOld)}, WR - [{round((player.wins / (player.wins + player.loses) * 100), 2)}%]") 
-                # | scout: {i.scoutDPM}, {i.scoutKD} [{i.scoutGames}] | soldier: {i.soldierDPM}, {i.soldierKD} [{i.soldierGames}] | demo: {i.demoDPM}, {i.demoKD} [{i.demoGames}] | medic: {i.medicHPM}, {i.medicUbers} [{i.medicGames}]")
-    
+            print(f"{player.nick} - {round(player.eloNew)}, {round(player.eloNew - player.eloOld)}, WR - [{round((player.wins / (player.wins + player.loses) * 100), 2)}%]") 
+                    # | scout: {i.scoutDPM}, {i.scoutKD} [{i.scoutGames}] | soldier: {i.soldierDPM}, {i.soldierKD} [{i.soldierGames}] | demo: {i.demoDPM}, {i.demoKD} [{i.demoGames}] | medic: {i.medicHPM}, {i.medicUbers} [{i.medicGames}]")
+
+    elif printMethod == 'xlsx':
+        xlsx.create_file(playerList, canSkipShitters)
+
     print(f"\n{prediction}% of matches were predicted correctly based on elo")
