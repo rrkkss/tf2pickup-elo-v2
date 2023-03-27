@@ -1,4 +1,10 @@
-import requests, time, player, elo, predictions, stats, general, setup
+import time, player, elo, predictions, stats, general, setup
+try:
+    import requests, xlsxwriter
+except Exception as e:
+    print(f"Couldn't import module(s): {e}")
+    print(f"Did you run 'pip install -r requirements.txt' ?")
+    quit()
 
 def init_parse():
     setup.init_setup(elo) # dependency injection
