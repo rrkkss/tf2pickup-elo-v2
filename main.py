@@ -4,7 +4,7 @@ import stats
 
 def main():
     parse.init_parse()
-    results.show_results(stats.playerList, parse.predictionFalse, parse.predictionRight, parse.canSkipShitters)
+    results.show_results(stats.playerList, stats.predictionFalse, stats.predictionRight)
 
 if __name__ == '__main__':
     main()
