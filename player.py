@@ -8,6 +8,7 @@ class Player:
         soldierGames: int, soldierPlayTime: float, soldierDPM: float, soldierDMG: int, soldierDT: int, soldierDTM: float, soldierKPM: float, soldierKD: float, soldierKDA: float, soldierDAPD: float, soldierAirshots: int, soldierKills: int, soldierAssists: int, soldierDeaths: int, soldierHR: int,
         demoGames: int, demoPlayTime: float, demoDPM: float, demoDMG: int, demoDT: int, demoDTM: float, demoKPM: float, demoKD: float, demoKDA: float, demoDAPD: float, demoAirshots: int, demoKills: int, demoAssists: int, demoDeaths: int, demoHR: int,
         medicGames: int, medicPlayTime: float, medicDPM: float, medicDMG: int, medicDT: int, medicDTM: float, medicKPM: float, medicKD: float, medicKDA: float, medicHeals: int, medicUbers: int, medicUD: int, medicHPM: float, medicKills: int, medicAssists: int, medicDeaths: int
+
     ):
         self.id = id
         self.nick = nick

@@ -11,6 +11,7 @@ def init_parse():
     config.init_setup(elo) # dependency injection
     get_logs(config.search, config.wait)
 
+
 def change_search_term(wait: float):
     search = input("\nEnter different keyword' => ")
     get_logs(search, wait)
@@ -86,6 +87,7 @@ def get_data_from_log(json):
         playerDMG = int(playerInfo['dmg'])
         playerDT = int(playerInfo['dt'])                # damage taken
         playerDTM = float(playerInfo['dt']) / (gameLength / 60) # damage taken per minute
+
         playerDAPD = float(playerInfo['dapd'])          # damage per death
         playerHR = int(playerInfo['hr'])                # heals recieved
         playerAirshots = int(playerInfo['as'])
@@ -138,6 +140,7 @@ def get_scores_from_json(json, team: str) -> int:
     for x in json['teams'].items():
         if x[0] == team:
             return int(x[1]['score'])
+    
     return exceptions.ScoreCouldntBeFound
 
 def loop_over_team(id: str, playerTeam: str, teamRedElo: list[float], scoreRed: int, teamBluElo: list[float], scoreBlu: int):

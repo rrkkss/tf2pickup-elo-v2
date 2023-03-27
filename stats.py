@@ -235,6 +235,7 @@ def set_player_bonus_elo(id: str, elo: int):
             return
 
 def get_average_elo(playerListInAGame: list[float]) -> float:
+
     return float(sum(playerListInAGame) / len(playerListInAGame))
 
 def is_shit_log(teams):
@@ -250,4 +251,5 @@ def get_player_elo(id: str) -> int or Exception:
     for player in playerList:
         if player.id == id:
             return player.eloNew
+
     return exceptions.IdNotFoundException
