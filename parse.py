@@ -1,40 +1,34 @@
 import requests, time, player, elo, predictions, stats, general, setup
 
 def init_parse():
-    search = input("\nEnter log title keyword, def 'tf2pickup.cz' => ") or 'tf2pickup.cz'
-    wait = input("Enter wait time inbetween logs, def 0.4 => ") or 0.4
-    wait = general.is_wait_number_valid(wait)
-    setup.can_add_bonus_elo(input("Count bonus elo (extra elo points based on kills, deaths etc)? [y / n]; def y => ") or 'y')
-    setup.count_elo_individually(input("Count players' elo individually (player vs team [y]) or not (team vs team [n]); def n => ") or 'n')
-    setup.can_skip_shitters(input("Skip people with less then 5 games in the final log? [y / n]; def y => ") or 'y')
-    elo.eloFactor = general.set_elo_factor(input("Set elo factor [number]; def 32 => ") or 32)
-
-    get_logs(search, wait)
+    setup.init_setup(elo) # dependency injection
+    get_logs(setup.search, setup.wait)
 
 def change_search_term(wait: float):
     search = input("\nEnter different keyword' => ")
     get_logs(search, wait)
 
 def get_logs(search: str, wait: float):
-    url = 'http://logs.tf/api/v1/log?title=' + search + '&limit=5000'
+    url = f"http://logs.tf/api/v1/log?title={search}&limit=5000"
     print(f"\nparsing from: {url}")
 
     try:
         json = requests.get(url).json()
     except Exception as e:
-        print(f"{e} \n json couldn't be parsed")
+        print(f"{e} \n Json couldn't be parsed")
         quit()
 
-    logList = create_log_list(json)
+    logList = create_log_id_list(json)
+    logListLength = len(logList)
 
-    if len(logList) > 0:
-        print(f"Found {logList.__len__()} results\n")
-        parse_logs(logList, wait, len(logList))
+    if logListLength > 0:
+        print(f"Found {logListLength} results\n")
+        parse_logs(logList, wait, logListLength)
     else:
-        print(f"Found {logList.__len__()} results, try another search term")
+        print(f"Found 0 results, try another search term")
         change_search_term(wait)
 
-def create_log_list(json) -> list:
+def create_log_id_list(json) -> list:
     logList = []
 
     for log in json['logs']:
@@ -43,9 +37,12 @@ def create_log_list(json) -> list:
     return logList
 
 def parse_logs(logList: list, wait: float, results: int):
-    for index, i in enumerate(reversed(logList)):
+    for index, log in enumerate(reversed(logList)):
         time.sleep(wait)
-        url = 'https://logs.tf/json/' + str(i)
+        url = 'https://logs.tf/json/' + str(log)
+
+        if index == 10:
+            break
 
         try:
             json = requests.get(url).json()
@@ -126,29 +123,33 @@ def get_data_from_log(json):
     else:
         stats.predictionFalse += 1
 
-    for i in teamRed:
-        loop_over_team(i, 'Red', teamRedElo, scoreRed, teamBluElo, scoreBlu)
+    for p in teamRed:
+        loop_over_team(p, 'Red', teamRedElo, scoreRed, teamBluElo, scoreBlu)
 
-    for i in teamBlu:
-        loop_over_team(i, 'Blu', teamRedElo, scoreRed, teamBluElo, scoreBlu)
+    for p in teamBlu:
+        loop_over_team(p, 'Blu', teamRedElo, scoreRed, teamBluElo, scoreBlu)
 
 def get_scores_from_json(json, team: str) -> int:
     for x in json['teams'].items():
         if x[0] == team:
             return int(x[1]['score'])
+    return exceptions.ScoreCouldntBeFound
 
-def loop_over_team(id: str, playerTeam: str, teamRedElo: float, scoreRed: int, teamBluElo: float, scoreBlu: int):
+def loop_over_team(id: str, playerTeam: str, teamRedElo: list[float], scoreRed: int, teamBluElo: list[float], scoreBlu: int):
+    avgBluElo = stats.get_average_elo(teamRedElo)
+    avgRedElo = stats.get_average_elo(teamBluElo)
+    
     if setup.countEloIndividually:
         eloInFocus = stats.get_player_elo(id)
     elif playerTeam == 'Red':
-        eloInFocus = stats.get_average_elo(teamRedElo)
+        eloInFocus = avgRedElo
     elif playerTeam == 'Blu':
-        eloInFocus = stats.get_average_elo(teamBluElo)
+        eloInFocus = avgBluElo
 
     stats.set_player_elo(
         id, elo.count_elo(
             eloInFocus, playerTeam,
-            stats.get_average_elo(teamRedElo), scoreRed,
-            stats.get_average_elo(teamBluElo), scoreBlu
+            avgRedElo, scoreRed,
+            avgRedElo, scoreBlu
         )
     )

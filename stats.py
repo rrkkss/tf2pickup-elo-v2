@@ -95,6 +95,11 @@ def set_stats(
     return player
 
 def calculate_averages(player: player.Player) -> player.Player:
+    if player.scoutGames == 0: player.scoutGames = 1
+    if player.soldierGames == 0: player.soldierGames = 1
+    if player.demoGames == 0: player.demoGames = 1
+    if player.medicGames == 0: player.medicGames = 1
+
     player.scoutPlayTime = round(player.scoutPlayTime / 3600, 2) #in hours
     player.scoutDPM = round(player.scoutDPM / player.scoutGames, 2)
     player.scoutKPM = round(player.scoutKPM / player.scoutGames, 2)
@@ -142,42 +147,48 @@ def add_player_stats(
     playerDPM: int, playerKPD: float, playerKAPD: float, playerDMG: int, playerDT: int, playerDAPD: float,
     playerHR: int, playerAirshots: int, playerKills: int, playerAssists: int, playerDeaths: int,
     playerHeal: int, playerUbers: int, playerUD: int, playerCPC: int, playerKPM: int
-):
-    for i in playerList:
-        if i.id == id:
-            i = set_stats(
-                i, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
+) -> None | Exception:
+    for player in playerList:
+        if player.id == id:
+            player = set_stats(
+                player, playerClass, playerClassTime, playerTeam, scoreBlu, scoreRed,
                 playerDPM, playerKPD, playerKAPD, playerDMG, playerDT, playerDAPD,
                 playerHR, playerAirshots, playerKills, playerAssists, playerDeaths,
                 playerHeal, playerUbers, playerUD, playerCPC, playerKPM
             )
             
             return
+    return exceptions.IdNotFoundException
 
-def get_player_nick(id: str) -> str:
-    for i in playerList:
-        if i.id == id:
-            return i.nick
+def get_player_nick(id: str) -> str | Exception:
+    for player in playerList:
+        if player.id == id:
+            return player.nick
+    
+    return exceptions.IdNotFoundException
 
 def set_player_elo(id: str, elo: float):
-    for i in playerList:
-        if i.id == id:
+    for player in playerList:
+        if player.id == id:
             try:
-                if i.bonusElo > -40:
-                    i.eloOld = i.eloNew
-                    i.eloNew = elo + i.bonusElo
+                # to explain this magic constant:
+                # if a player has a long time on a class without many kills (eg 15 minutes, 3 kills)
+                # the bonus elo tanks and this is a good indication of a player not really playing the game
+                if player.bonusElo > -40:
+                    player.eloOld = player.eloNew
+                    player.eloNew = elo + player.bonusElo
                     return
             except:
                 print(f"elo couldnt be set for '{get_player_nick(id)}', probably due to being subbed out")
                 return
 
 def set_player_bonus_elo(id: str, elo: int):
-     for i in playerList:
-        if i.id == id:
-            i.bonusElo = elo
+     for player in playerList:
+        if player.id == id:
+            player.bonusElo = elo
             return
 
-def get_average_elo(playerListInAGame: list) -> float:
+def get_average_elo(playerListInAGame: list[float]) -> float:
     return float(sum(playerListInAGame) / len(playerListInAGame))
 
 def is_shit_log(teams):
@@ -190,7 +201,7 @@ def is_player_added(id):
     return False if next((player for player in playerList if player.id == id), None) == None else True
 
 def get_player_elo(id: str) -> int or Exception:
-    for i in playerList:
-        if i.id == id:
-            return i.eloNew
+    for player in playerList:
+        if player.id == id:
+            return player.eloNew
     return exceptions.IdNotFoundException

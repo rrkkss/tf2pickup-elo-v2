@@ -78,4 +78,65 @@ class Player:
         self.medicDeaths = medicDeaths
 
 def createPlayer(id: str, nick: str) -> Player:
-    return Player(id, nick, 1600, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    return Player(
+        id, 
+        nick, 
+        1600,   # eloNew
+        0,      # eloOld
+        0,      # eloDif
+        0,      # bonusElo
+        0,      # gamesCount
+        0,      # wins
+        0,      # loses
+        0,      # draws
+        0,      # redGames
+        0,      # redLoses
+        0,      # redWins
+        0,      # redDraws
+        0,      # bluGames
+        0,      # bluLoses
+        0,      # bluWins
+        0,      # bluDraws
+        0,      # scoutGames
+        0,      # scoutPlayTime
+        0,      # scoutDPM
+        0,      # scoutKPM
+        0,      # scoutKD
+        0,      # scoutKDA
+        0,      # scoutACC
+        0,      # scoutKills
+        0,      # scoutAssists
+        0,      # scoutDeaths
+        0,      # soldierGames
+        0,      # soldierPlayTime
+        0,      # soldierDPM
+        0,      # soldierKPM
+        0,      # soldierKD
+        0,      # soldierKDA
+        0,      # soldierAirshots
+        0,      # soldierKills
+        0,      # soldierAssists
+        0,      # soldierDeaths
+        0,      # demoGames
+        0,      # demoPlayTime
+        0,      # demoDPM
+        0,      # demoKPM
+        0,      # demoKD
+        0,      # demoKDA
+        0,      # demoAirshots
+        0,      # demoKills
+        0,      # demoAssists
+        0,      # demoDeaths
+        0,      # medicGames
+        0,      # medicPlayTime
+        0,      # medicDPM
+        0,      # medicKPM
+        0,      # medicKD
+        0,      # medicKDA
+        0,      # medicHeals
+        0,      # medicUbers
+        0,      # medicHPM
+        0,      # medicKills
+        0,      # medicAssists
+        0       # medicDeaths
+    )
