@@ -1,4 +1,4 @@
-import time, player, elo, predictions, stats, general, config
+import time, player, elo, predictions, stats, config, exceptions
 try:
     # I'm importing them here as to prevent some unwanted behaviour way later
     import requests, xlsxwriter
@@ -64,6 +64,14 @@ def parse_logs(logList: list, wait: float, results: int):
 
 def get_data_from_log(json):
     nicks = json['names']
+
+    # 11 to 15 people for sixes game
+    # 11 -> one isn't in logs (maybe bad name w/e)
+    # 15 -> game with 3 subs, which I think will RARELY get over
+    if len(nicks) < 10 or len(nicks) > 16:
+        print(f"~~~ Non-sixes log detected, skipping")
+        return
+
     teamRed = []; teamRedElo = []; teamBlu = []; teamBluElo = []
 
     for k, v in nicks.items():

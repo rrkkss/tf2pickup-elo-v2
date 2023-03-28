@@ -41,3 +41,12 @@ def set_elo_factor(num: int) -> int:
             num = input(f"Not a valid number, please enter a new one => ")
 
     return num
+
+def remove_invalid_chars(inp: str) -> str:
+    word = []
+    chars = ['[', ']', ':', '*', '?', '/', '\\']
+    for char in inp:
+        if char not in chars:
+            word.append(char)
+
+    return ''.join(str(v) for v in word)

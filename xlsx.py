@@ -1,4 +1,4 @@
-import xlsxwriter, stats, player
+import xlsxwriter, stats, player, general
 
 def create_structure(worksheet, colours: list[str]):
     worksheet.set_column('A:A', 12)
@@ -190,10 +190,16 @@ def create_file(playerList: list, canSkipShitters: bool):
 
         player = stats.calculate_averages(player)
 
-        worksheet = workbook.add_worksheet(player.nick)
-        worksheet = create_structure(worksheet, [green, red, blue, yellow])
-        worksheet = write_data(worksheet, player)
-        print(f"Succesfuly written [{index + 1}/{len(playerList)}]")
+        try:
+            player.nick = general.remove_invalid_chars(player.nick)
+            worksheet = workbook.add_worksheet(player.nick)
+            worksheet = create_structure(worksheet, [green, red, blue, yellow])
+            worksheet = write_data(worksheet, player)
+            
+            print(f"Succesfuly written [{index + 1}/{len(playerList)}]")
+        
+        except Exception as e:
+            print(f"Writing failed, because: {e}")
 
     try:
         workbook.close()
