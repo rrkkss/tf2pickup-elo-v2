@@ -1,6 +1,6 @@
 import time, player, elo, predictions, stats, general, config
+
 try:
-    # I'm importing them here as to prevent some unwanted behaviour way later
     import requests, xlsxwriter
 except Exception as e:
     print(f"Couldn't import module(s): {e}")
@@ -8,9 +8,8 @@ except Exception as e:
     quit()
 
 def init_parse():
-    config.init_setup(elo) # dependency injection
+    config.init_setup(elo)
     get_logs(config.search, config.wait)
-
 
 def change_search_term(wait: float):
     search = input("\nEnter different keyword' => ")
@@ -27,20 +26,23 @@ def get_logs(search: str, wait: float):
         quit()
 
     logList = create_log_id_list(json)
-    logListLength = len(logList)
 
-    if logListLength > 0:
-        print(f"Found {logListLength} results\n")
-        parse_logs(logList, wait, logListLength)
+    if len(logList) > 0:
+        print(f"Found {len(logList)} results\n")
+        parse_logs(logList, wait, len(logList))
     else:
         print(f"Found 0 results, try another search term")
         change_search_term(wait)
 
 def create_log_id_list(json) -> list:
-    logList = []
+    logList = []; lastDate = ''; lastTitle = ''
 
     for log in json['logs']:
-        logList.append(log['id'])
+        if lastDate != log['date']:
+            logList.append(log['id'])
+
+        lastDate = log['date']
+        lastTitle = log['title']
 
     return logList
 
@@ -64,6 +66,14 @@ def parse_logs(logList: list, wait: float, results: int):
 
 def get_data_from_log(json):
     nicks = json['names']
+
+    # 11 to 15 people for sixes game
+    # 11 -> one isn't in logs (maybe bad name w/e)
+    # 15 -> game with 3 subs, which I think will RARELY get over
+    if len(nicks) < 10 or len(nicks) > 16:
+        print(f"~~~ Non-sixes log detected, skipping")
+        return
+
     teamRed = []; teamRedElo = []; teamBlu = []; teamBluElo = []
 
     for k, v in nicks.items():
