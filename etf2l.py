@@ -1,9 +1,9 @@
 import requests
 
-def get_etf2l_nick(id: str) -> str or None:
+def get_nick(id: str) -> str or Exception:
     try:
-        # for some fucking reason it doesn't return json, so that's that
-        # why even make an API if it only returns html pages
-        return requests.get(f"https://api.etf2l.org/player/{id}").content.decode('utf8').replace("'", '"').split('"name" : "')[1].split('"')[0]
+        var = requests.get(f"https://api.etf2l.org/player/{id}.json").json()
+        return var["player"]["name"]
     except:
+        # if conversion fails, nickname from pickup is used
         return None

@@ -184,7 +184,7 @@ def calculate_averages(player: player.Player) -> player.Player:
     player.medicDeaths = round(player.medicDeaths / player.medicGames, 2)
 
     if config.etf2lNicks:
-        player.nick = etf2l.get_etf2l_nick(player.id) or player.nick
+        player.nick = etf2l.get_nick(player.id) or player.nick
 
     return player
 
