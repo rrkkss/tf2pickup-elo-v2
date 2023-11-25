@@ -1,8 +1,8 @@
-import stats, operator, config, xlsx, player
+import stats, operator, config, xlsx
 
 def show_results(player_list: list, prediction_false: int, prediction_right: int):
     can_skip_shitters: bool = config.can_skip_shitters(input("\nSkip people with less then or equal to 5 games in the final log? [y / n]; def y => ") or 'y')
-    print_method: str = config.check_export_method(input('Choose export method [print / xlsx] def print => ') or 'print')
+    print_method: str = config.check_export_method(input('Choose export method [print / xlsx] def xlsx => ') or 'xlsx')
     config.etf2lNick = config.set_etf2l_nicks(input('Change nicks to ETF2L ones? [y / n] def y => ') or 'y')
     prediction: float = round((prediction_right/(prediction_false + prediction_right)) * 100, 3)
     print('~~~~~~~~~~~~~~~~~~~~~~~')

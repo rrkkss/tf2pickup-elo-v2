@@ -12,17 +12,17 @@ def get_winning_team(red: str, blu: str) -> str:
         return 'draw'
 
 def is_wait_number_valid(num: float) -> float:
-    isNumberValid = False
+    is_number_valid = False
 
-    if not is_number_valid(num):
-        while isNumberValid == False:
+    if not is_float_valid(num):
+        while is_number_valid == False:
             num = input("Not a valid number, enter a new one => ")
-            if is_number_valid(num):
-                isNumberValid = True
+            if is_float_valid(num):
+                is_number_valid = True
     
     return float(num)
 
-def is_number_valid(num: any) -> bool:
+def is_float_valid(num: any) -> bool:
     try:
         float(num)
         return True
@@ -30,13 +30,13 @@ def is_number_valid(num: any) -> bool:
         return False
 
 def set_elo_factor(num: int) -> int:
-    isValid = False
+    is_valid = False
 
-    while isValid == False:
+    while is_valid == False:
         try:
             num = int(num)
             if num > 0:
-                isValid = True
+                is_valid = True
         except:
             num = input("Not a valid number, please enter a new one => ")
 
