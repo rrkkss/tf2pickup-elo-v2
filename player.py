@@ -97,7 +97,7 @@ class Player:
         self.medicAssists = medicAssists
         self.medicDeaths = medicDeaths
 
-def createPlayer(id: str, nick: str) -> Player:
+def create_player(id: str, nick: str) -> Player:
     return Player(
         id, 
         nick, 

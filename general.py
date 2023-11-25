@@ -16,7 +16,7 @@ def is_wait_number_valid(num: float) -> float:
 
     if not is_number_valid(num):
         while isNumberValid == False:
-            num = input(f"Not a valid number, enter a new one => ")
+            num = input("Not a valid number, enter a new one => ")
             if is_number_valid(num):
                 isNumberValid = True
     
@@ -38,7 +38,7 @@ def set_elo_factor(num: int) -> int:
             if num > 0:
                 isValid = True
         except:
-            num = input(f"Not a valid number, please enter a new one => ")
+            num = input("Not a valid number, please enter a new one => ")
 
     return num
 

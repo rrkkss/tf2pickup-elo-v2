@@ -1,6 +1,6 @@
-def was_prediction_right(blu: str, red: str, bluWin: float, redWin: float) -> bool:
-    if (blu > red and bluWin > redWin) or (blu < red and bluWin < redWin) or (blu == red and bluWin == redWin):
+def was_prediction_right(blu: str, red: str, blu_win: float, red_win: float) -> bool:
+    if (blu > red and blu_win > red_win) or (blu < red and blu_win < red_win) or (blu == red and blu_win == red_win):
         return True
-    elif (blu > red and bluWin < redWin) or (blu < red and bluWin > redWin) or (blu == red and (bluWin > redWin or bluWin < redWin)) or ((blu > red or blu < red) and bluWin == redWin):
+    elif (blu > red and blu_win < red_win) or (blu < red and blu_win > red_win) or (blu == red and (blu_win > red_win or blu_win < red_win)) or ((blu > red or blu < red) and blu_win == red_win):
         return False
     return False

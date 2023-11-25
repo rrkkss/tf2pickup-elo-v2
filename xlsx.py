@@ -177,15 +177,15 @@ def write_data(worksheet, player: player.Player):
 
     return worksheet
 
-def create_file(playerList: list, canSkipShitters: bool):
+def create_file(player_list: list, can_skip_shitters: bool):
     workbook = xlsxwriter.Workbook('pickup_data.xlsx')
     green = workbook.add_format({'bg_color': '#28c840'})
     red = workbook.add_format({'bg_color': '#eb5449'})
     blue = workbook.add_format({'bg_color': '#1596f4'})
     yellow = workbook.add_format({'bg_color': '#eef415'})
     
-    for index, player in enumerate(playerList):
-        if canSkipShitters and player.gamesCount <= 5:
+    for index, player in enumerate(player_list):
+        if can_skip_shitters and player.gamesCount <= 5:
             continue
 
         player = stats.calculate_averages(player)
@@ -196,13 +196,13 @@ def create_file(playerList: list, canSkipShitters: bool):
             worksheet = create_structure(worksheet, [green, red, blue, yellow])
             worksheet = write_data(worksheet, player)
             
-            print(f"Succesfuly written [{index + 1}/{len(playerList)}]")
+            print(f"Succesfuly written [{index + 1}/{len(player_list)}]")
         
         except Exception as e:
-            print(f"Writing failed, because: {e}")
+            print(f"Writing data failed: {e}")
 
     try:
         workbook.close()
-        print(f"Succusfully saved")
+        print("Succesfully saved")
     except Exception as e:
         print(f"Couldn't save file: {e}")

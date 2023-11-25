@@ -2,6 +2,8 @@ import general
 
 wait = 0; search = ''
 canAddBonusElo = True; countEloIndividually = False; canSkipShitters = True; etf2lNicks = True
+lowestSixesPlayerCount = 11
+highestSixesPlayerCount = 15
 
 def can_add_bonus_elo(input: str): # def true
     if input.lower() == 'n':
@@ -37,7 +39,7 @@ def check_export_method(inp: str) -> str:
     inp = inp.lower()
     if inp != 'print' and inp != 'xlsx':
         while True:
-            inp = input(f"Not valid, choose again => ")
+            inp = input("Not valid, choose again => ")
             if inp == 'print' or inp == 'xlsx':
                 break
     return inp

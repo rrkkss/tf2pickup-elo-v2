@@ -12,10 +12,10 @@ def set_stats(
     
     player.gamesCount += 1
 
-    winningTeam = general.get_winning_team(scoreRed, scoreBlu)
-    if winningTeam != 'draw':
+    winning_team = general.get_winning_team(scoreRed, scoreBlu)
+    if winning_team != 'draw':
         #if the player won
-        if general.compare_string(winningTeam, playerTeam):
+        if general.compare_string(winning_team, playerTeam):
             player.wins += 1
             if playerTeam == 'Blue':
                 player.bluGames += 1
@@ -217,9 +217,8 @@ def set_player_elo(id: str, elo: float):
     for player in playerList:
         if player.id == id:
             try:
-                # to explain this magic constant:
-                # if a player has a long time on a class without many kills (eg 15 minutes, 3 kills)
-                # the bonus elo tanks and this is a good indication of a player not really playing the game
+                # if a player has a long time on a class without many kills (eg 3 kills in 15 minutes)
+                # the bonus elo tanks and is a good indication of a player not really playing the game
                 if player.bonusElo > -40:
                     player.eloOld = player.eloNew
                     player.eloNew = elo + player.bonusElo
@@ -234,9 +233,8 @@ def set_player_bonus_elo(id: str, elo: int):
             player.bonusElo = elo
             return
 
-def get_average_elo(playerListInAGame: list[float]) -> float:
-
-    return float(sum(playerListInAGame) / len(playerListInAGame))
+def get_average_elo(player_list_in_a_game: list[float]) -> float:
+    return float(sum(player_list_in_a_game) / len(player_list_in_a_game))
 
 def is_shit_log(teams):
     for team in teams.values():
